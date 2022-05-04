@@ -12,12 +12,11 @@ route -p add 104.18.0.0 mask 255.255.0.0 192.168.42.129 metric 1 if 23
 5.ローカル内の外部マシンで後述のファイルで指定されるプロキシサーバーを立てることで書き込み以外の5ch.netとの通信は固定回線で行うようにする（必須）
 6. config.txtを作成して各行に以下のように記述
 ```
-1行目にLINE Messaging APIのキー
-2行目にLINE Messaging APIの宛先用ユーザー識別子
-3行目にLINE画像アップロードサーバー、http://example.com/のように記述、http://example.com/upimg.phpにアップロード用スクリプトを設置 (*1)
-4行目にLINE Messaging API用のWebhookのURL、http://example.com/webhook/のように記述 (*2)
-5行目にIP取得用URLを記述して実行フォルダに置く、http://example.com/getIP.phpのように記述 (*3)
-6行目に書き込み以外の5ch.netとの通信に用いるプロキシサーバーを指定(例:192.168.10.21:3128)
+1行目にLINE Messaging APIのキー(各種通知用)
+2行目にLINE画像アップロードサーバー、http://example.com/のように記述、http://example.com/upimg.phpにアップロード用スクリプトを設置 (*1)
+3行目にLINE Messaging API用のWebhookのURL、http://example.com/webhook/のように記述 (*2)
+4行目にIP取得用URLを記述して実行フォルダに置く、http://example.com/getIP.phpのように記述 (*3)
+5行目に書き込み以外の5ch.netとの通信に用いるプロキシサーバー、192.168.10.21:3128のように記述
 ```
 7. 起動して「新規」クリック後、自宅IPを設定(自宅IPでの書き込みを防ぐため)
 8. Gather MonaをクリックしてMonaKey50個の取得が完了したら適当な条件でBotをStartして50レスほど投下して期限切れ回避(PostボタンではUAは切り替わらない)

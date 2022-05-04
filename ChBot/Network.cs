@@ -27,7 +27,6 @@ namespace ChBot
         private static string ReadAppKey = "8yoeAcaLXiEY1FjEuJBKgkPxirkDqn";
         private static string ReadHMKey = "F7vFmWCGd5Gzs8hc03NpRvw4bPwMz3";
         private static string lineAuth = "";
-        private static string lineDestId = "";
         private static string imgUploadServer = "";
         private static string lineRecieveWebhookUrl = "";
         private static string ipGetUrl = "";
@@ -42,11 +41,10 @@ namespace ChBot
         {
             var lines = File.ReadAllLines(@"config.txt");
             lineAuth = lines[0].Trim();
-            lineDestId = lines[1].Trim();
-            imgUploadServer = lines[2].Trim();
-            lineRecieveWebhookUrl = lines[3].Trim();
-            ipGetUrl = lines[4].Trim();
-            passProxy = new WebProxy(lines[5].Trim());
+            imgUploadServer = lines[1].Trim();
+            lineRecieveWebhookUrl = lines[2].Trim();
+            ipGetUrl = lines[3].Trim();
+            passProxy = new WebProxy(lines[4].Trim());
         }
 
         //APIのSIDを取得
@@ -699,7 +697,6 @@ namespace ChBot
         {
             var jsonstr = JsonSerializer.Serialize(new
             {
-                to = lineDestId,
                 messages = new[]{new
                     {
                         type = "text",
@@ -716,7 +713,7 @@ namespace ChBot
 
             var postDataBytes = Encoding.UTF8.GetBytes(jsonstr);
 
-            var req = (HttpWebRequest)WebRequest.Create("https://api.line.me/v2/bot/message/push");
+            var req = (HttpWebRequest)WebRequest.Create("https://api.line.me/v2/bot/message/broadcast");
             req.Method = "POST";
             req.KeepAlive = false;
             req.ContentType = "application/json";
@@ -742,7 +739,6 @@ namespace ChBot
         {
             var jsonstr = JsonSerializer.Serialize(new
             {
-                to = lineDestId,
                 messages = new[]{new
                     {
                         type = "image",
@@ -760,7 +756,7 @@ namespace ChBot
 
             var postDataBytes = Encoding.UTF8.GetBytes(jsonstr);
 
-            var req = (HttpWebRequest)WebRequest.Create("https://api.line.me/v2/bot/message/push");
+            var req = (HttpWebRequest)WebRequest.Create("https://api.line.me/v2/bot/message/broadcast");
             req.Method = "POST";
             req.KeepAlive = false;
             req.ContentType = "application/json";
