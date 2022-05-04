@@ -24,8 +24,8 @@ namespace ChBot
 
     public static class Network
     {
-        private static string AppKey = "8yoeAcaLXiEY1FjEuJBKgkPxirkDqn";
-        private static string HMKey = "F7vFmWCGd5Gzs8hc03NpRvw4bPwMz3";
+        private static string ReadAppKey = "8yoeAcaLXiEY1FjEuJBKgkPxirkDqn";
+        private static string ReadHMKey = "F7vFmWCGd5Gzs8hc03NpRvw4bPwMz3";
         private static string lineAuth = "";
         private static string lineDestId = "";
         private static string imgUploadServer = "";
@@ -52,15 +52,15 @@ namespace ChBot
         public static async Task<string> GetApiSid(string user = "", string password = "")
         {
             var CT = "1234567890";
-            var message = AppKey + CT;
+            var message = ReadAppKey + CT;
             var messageData = Encoding.UTF8.GetBytes(message);
-            var keyData = Encoding.UTF8.GetBytes(HMKey);
+            var keyData = Encoding.UTF8.GetBytes(ReadHMKey);
             var hmac = new HMACSHA256(keyData);
             var bs = hmac.ComputeHash(messageData);
             hmac.Clear();
             var HB = BitConverter.ToString(bs).ToLower().Replace("-", "");
 
-            var parameters = "ID=" + user + "&PW=" + password + "&KY=" + AppKey + "&CT=" + CT + "&HB=" + HB;
+            var parameters = "ID=" + user + "&PW=" + password + "&KY=" + ReadAppKey + "&CT=" + CT + "&HB=" + HB;
             var data = Encoding.ASCII.GetBytes(parameters);
 
             var url = "https://api.5ch.net/v1/auth/";
@@ -476,15 +476,15 @@ namespace ChBot
                 if (apiSid == "")
                     throw new NotSetSidException();
 
-                var message = "/v1/" + thread.Server.Split('.')[0] + "/" + thread.Bbs + "/" + thread.Key.ToString() + apiSid + AppKey;
+                var message = "/v1/" + thread.Server.Split('.')[0] + "/" + thread.Bbs + "/" + thread.Key.ToString() + apiSid + ReadAppKey;
                 var messageData = Encoding.UTF8.GetBytes(message);
-                var keyData = Encoding.UTF8.GetBytes(HMKey);
+                var keyData = Encoding.UTF8.GetBytes(ReadHMKey);
                 var hmac = new HMACSHA256(keyData);
                 var bs = hmac.ComputeHash(messageData);
                 hmac.Clear();
                 var hobo = BitConverter.ToString(bs).ToLower().Replace("-", "");
 
-                var parameters = "sid=" + apiSid + "&hobo=" + hobo + "&appkey=" + AppKey;
+                var parameters = "sid=" + apiSid + "&hobo=" + hobo + "&appkey=" + ReadAppKey;
                 var data = Encoding.ASCII.GetBytes(parameters);
 
                 var url = "https://api.5ch.net/v1/" + thread.Server.Split('.')[0] + "/" + thread.Bbs + "/" + thread.Key.ToString();
