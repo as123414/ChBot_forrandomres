@@ -31,7 +31,7 @@ namespace ChBot
         private static string imgUploadServer = "";
         private static string lineRecieveWebhookUrl = "";
         private static string ipGetUrl = "";
-        private static WebProxy passProxy = new WebProxy("192.168.10.21:3128");
+        private static WebProxy passProxy = null;
 
         static Network()
         {
@@ -46,6 +46,7 @@ namespace ChBot
             imgUploadServer = lines[2].Trim();
             lineRecieveWebhookUrl = lines[3].Trim();
             ipGetUrl = lines[4].Trim();
+            passProxy = new WebProxy(lines[5].Trim());
         }
 
         //APIのSIDを取得
