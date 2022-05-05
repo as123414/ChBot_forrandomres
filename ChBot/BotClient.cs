@@ -43,7 +43,7 @@ namespace ChBot
 
             Attempt = 0;
             Count = context.Interval;
-            SearchCount = 60;
+            SearchCount = 0;
             Working = false;
             this.ui = ui;
             this.context = context;
@@ -66,7 +66,7 @@ namespace ChBot
                 Count = context.Interval;
                 Working = true;
                 timer1.Enabled = true;
-                SearchCount = 1;
+                SearchCount = 0;
                 timer2.Enabled = true;
                 button1.Text = "停止";
                 button1.BackColor = Color.Red;
@@ -184,7 +184,7 @@ namespace ChBot
                     if (searchAttempt < 10)
                     {
                         timer2.Enabled = true;
-                        SearchCount = 8;
+                        SearchCount = 10;
                         label9.Text = SearchCount.ToString();
                         ui.UpdateUI();
                     }
