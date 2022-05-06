@@ -23,6 +23,7 @@ namespace ChBot
         public BotContext context;
         public bool proceccing;
         public long processStartTime = 0;
+        public bool timerProceccing = false;
         public long searchProcessStartTime = 0;
         public int SearchCount;
         public int searchAttempt = 0;
@@ -89,7 +90,7 @@ namespace ChBot
             if (!Working)
                 return;
 
-            while (proceccing || searchProccesing)
+            while (proceccing || searchProccesing || timerProceccing)
                 await Task.Delay(100);
 
             timer1.Enabled = false;
@@ -129,34 +130,42 @@ namespace ChBot
 
         private async void timer1_Tick(object sender, EventArgs e)
         {
-            Count -= 0.1;
-            Count = Count < 0 ? 0 : Count;
-            RestTimeLabel.Text = Count.ToString();
-            ui.UpdateUI(BotInstance.UIParts.Other);
-
-            var startTime = UnixTime.Now();
-
-            if (Count <= 0)
+            timerProceccing = true;
+            try
             {
-                if (!proceccing)
-                {
-                    await Proccess();
-                    Count = context.Interval;
-                }
-                else
-                {
-                    Count = 0;
-                }
-
+                Count -= 0.1;
+                Count = Count < 0 ? 0 : Count;
                 RestTimeLabel.Text = Count.ToString();
                 ui.UpdateUI(BotInstance.UIParts.Other);
-            }
 
-            if (UnixTime.Now() - startTime < 2)
+                var startTime = UnixTime.Now();
+
+                if (Count <= 0)
+                {
+                    if (!proceccing)
+                    {
+                        await Proccess();
+                        Count = context.Interval;
+                    }
+                    else
+                    {
+                        Count = 0;
+                    }
+
+                    RestTimeLabel.Text = Count.ToString();
+                    ui.UpdateUI(BotInstance.UIParts.Other);
+                }
+
+                if (UnixTime.Now() - startTime < 2)
+                {
+                    timer1.Enabled = false;
+                    await Task.Delay(1000);
+                    timer1.Enabled = true;
+                }
+            }
+            finally
             {
-                timer1.Enabled = false;
-                await Task.Delay(1000);
-                timer1.Enabled = true;
+                timerProceccing = false;
             }
         }
 
