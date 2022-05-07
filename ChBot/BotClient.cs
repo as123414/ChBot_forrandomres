@@ -62,6 +62,7 @@ namespace ChBot
             try
             {
                 Attempt = 0;
+                searchAttempt = 0;
                 hasLastChance = true;
                 hasLastChance2 = true;
                 Count = context.Interval;
@@ -181,6 +182,9 @@ namespace ChBot
                 try
                 {
                     await RefreshThread();
+
+                    // 成功したらリセット
+                    searchAttempt = 0;
                 }
                 catch (Exception er)
                 {
