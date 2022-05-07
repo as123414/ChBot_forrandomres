@@ -679,6 +679,19 @@ namespace ChBot
             await Task.Delay(500);
         }
 
+        public static async Task DisableWiFi()
+        {
+            await Task.Run(() =>
+            {
+                using (var invoker = new RunspaceInvoke())
+                {
+                    invoker.Invoke("adb shell svc wifi disable\r\n");
+                }
+            });
+
+            await Task.Delay(500);
+        }
+
         public static async Task<string> GetIPAddress()
         {
             var req = (HttpWebRequest)WebRequest.Create(ipGetUrl);
