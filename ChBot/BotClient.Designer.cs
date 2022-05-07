@@ -135,7 +135,7 @@
             this.label6.Size = new System.Drawing.Size(11, 12);
             this.label6.TabIndex = 7;
             this.label6.Text = "0";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label7
             // 

@@ -243,26 +243,18 @@ namespace ChBot
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            foreach (var instance in instanceList)
-            {
-                var client = instance.context.client;
-                Console.WriteLine("[" + instance.InstanceName + "]");
-                Console.WriteLine(UnixTime.Now() - client.processStartTime);
-                Console.WriteLine(UnixTime.Now() - client.searchProcessStartTime);
-            }
-
             var cond1 = instanceList.Any(instance => instance.context.Loginer.Logining && UnixTime.Now() - instance.context.Loginer.loginStratTime > 30);
 
             var cond2 = instanceList.Any(instance =>
             {
                 var client = instance.context.client;
-                return client.proceccing && UnixTime.Now() - client.processStartTime > 30;
+                return client.timer1Proceccing && UnixTime.Now() - client.timer1ProccessStartTime > 30;
             });
 
             var cond3 = instanceList.Any(instance =>
             {
                 var client = instance.context.client;
-                return instance.context.client.searchProccesing && UnixTime.Now() - instance.context.client.searchProcessStartTime > 180;
+                return instance.context.client.timer2Proceccing && UnixTime.Now() - instance.context.client.timer2ProccessStartTime > 180;
             });
 
             if (cond1 || cond2 || cond3)
@@ -282,32 +274,20 @@ namespace ChBot
 
             var selectedInstance = (BotInstance)listView1.SelectedItems[0].Tag;
 
+            button3.Enabled = false;
             while (selectedInstance.context.Loginer.Logining)
                 await Task.Delay(100);
 
             if (selectedInstance.context.Working)
             {
-                try
-                {
-                    await selectedInstance.context.StopAttack();
-                }
-                catch (Exception er)
-                {
-                    MessageBox.Show("停止失敗\n" + er.Message);
-                }
+                await selectedInstance.context.StopAttack();
             }
             else
             {
-                try
-                {
-                    await selectedInstance.context.StartAttack();
-                }
-                catch (Exception er)
-                {
-                    MessageBox.Show("開始失敗\n" + er.Message);
-                    await selectedInstance.context.StopAttack();
-                }
+                await selectedInstance.context.StartAttack();
             }
+
+            button3.Enabled = true;
             selectedInstance.UpdateUI();
             UpdateUI();
         }

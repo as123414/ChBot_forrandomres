@@ -17,22 +17,22 @@ namespace ChBot
     public partial class BotClient : Form
     {
         public int Attempt { get; private set; }
-        public double Count { get; private set; }
+        public double PostCount { get; private set; }
         public bool Working { get; private set; }
         public BotInstance ui;
         public BotContext context;
-        public bool proceccing;
-        public long processStartTime = 0;
-        public bool timerProceccing = false;
-        public long searchProcessStartTime = 0;
+        public bool timer1Proceccing = false;
+        public long timer1ProccessStartTime = 0;
+        public bool timer2Proceccing = false;
+        public long timer2ProccessStartTime = 0;
         public int SearchCount;
         public int searchAttempt = 0;
         public Dictionary<BotThread, double> powerList = new Dictionary<BotThread, double>();
-        public bool searchProccesing = false;
         public List<BotThread> notifiedThreads = new List<BotThread>();
         public bool hasLastChance = true;
         public bool hasLastChance2 = true;
         public Exception lastRefreshException = null;
+        public bool toStop = false;
 
         public BotClient(BotInstance ui, BotContext context)
         {
@@ -43,14 +43,13 @@ namespace ChBot
 #endif
 
             Attempt = 0;
-            Count = context.Interval;
+            PostCount = context.Interval;
             SearchCount = 0;
             Working = false;
             this.ui = ui;
             this.context = context;
-            proceccing = false;
             label6.Text = Attempt.ToString() + "/10";
-            RestTimeLabel.Text = Count.ToString();
+            RestTimeLabel.Text = PostCount.ToString();
             label9.Text = SearchCount.ToString();
         }
 
@@ -59,31 +58,18 @@ namespace ChBot
             if (Working)
                 return;
 
-            try
-            {
-                Attempt = 0;
-                searchAttempt = 0;
-                hasLastChance = true;
-                hasLastChance2 = true;
-                Count = context.Interval;
-                Working = true;
-                timer1.Enabled = true;
-                SearchCount = 0;
-                timer2.Enabled = true;
-                button1.Text = "停止";
-                button1.BackColor = Color.Red;
-                button1.ForeColor = Color.White;
-            }
-            catch
-            {
-                Working = false;
-                timer1.Enabled = false;
-                timer2.Enabled = false;
-                button1.Text = "開始";
-                button1.BackColor = SystemColors.Control;
-                button1.ForeColor = SystemColors.ControlText;
-                throw;
-            }
+            Attempt = 0;
+            searchAttempt = 0;
+            hasLastChance = true;
+            hasLastChance2 = true;
+            PostCount = context.Interval;
+            Working = true;
+            timer1.Enabled = true;
+            SearchCount = 0;
+            timer2.Enabled = true;
+            button1.Text = "停止";
+            button1.BackColor = Color.Red;
+            button1.ForeColor = Color.White;
         }
 
         public async Task Stop()
@@ -91,8 +77,10 @@ namespace ChBot
             if (!Working)
                 return;
 
-            while (proceccing || searchProccesing || timerProceccing)
+            toStop = true;
+            while (timer1Proceccing || timer2Proceccing)
                 await Task.Delay(100);
+            toStop = false;
 
             timer1.Enabled = false;
             timer2.Enabled = false;
@@ -118,7 +106,9 @@ namespace ChBot
         {
             if (Working)
             {
+                button1.Enabled = false;
                 await Stop();
+                button1.Enabled = true;
             }
             else
             {
@@ -131,129 +121,135 @@ namespace ChBot
 
         private async void timer1_Tick(object sender, EventArgs e)
         {
-            timerProceccing = true;
+            if (toStop) return;
+
+            PostCount -= 0.1;
+            PostCount = PostCount < 0 ? 0 : PostCount;
+            RestTimeLabel.Text = PostCount.ToString();
+            ui.UpdateUI(BotInstance.UIParts.Other);
+
+            var code = 0;
             try
             {
-                Count -= 0.1;
-                Count = Count < 0 ? 0 : Count;
-                RestTimeLabel.Text = Count.ToString();
-                ui.UpdateUI(BotInstance.UIParts.Other);
+                timer1Proceccing = true;
+                timer1ProccessStartTime = UnixTime.Now();
+                timer1.Enabled = false;
 
                 var startTime = UnixTime.Now();
 
-                if (Count <= 0)
+                if (PostCount <= 0)
                 {
-                    if (!proceccing)
+                    try
                     {
-                        await Proccess();
-                        Count = context.Interval;
+                        code = await Proccess();
                     }
-                    else
+                    finally
                     {
-                        Count = 0;
+                        PostCount = context.Interval;
+                        RestTimeLabel.Text = PostCount.ToString();
+                        ui.UpdateUI(BotInstance.UIParts.Other);
                     }
-
-                    RestTimeLabel.Text = Count.ToString();
-                    ui.UpdateUI(BotInstance.UIParts.Other);
                 }
 
                 if (UnixTime.Now() - startTime < 2)
                 {
-                    timer1.Enabled = false;
                     await Task.Delay(1000);
-                    timer1.Enabled = true;
                 }
             }
+            catch { }
             finally
             {
-                timerProceccing = false;
+                timer1Proceccing = false;
+                if (code == 0)
+                {
+                    timer1.Enabled = Working;
+                }
+                else
+                {
+                    await Stop();
+                    ui.UpdateUI(BotInstance.UIParts.Other);
+                    ui.manager.UpdateUI();
+                }
             }
         }
 
         private async void timer2_Tick(object sender, EventArgs e)
         {
+            if (toStop) return;
+
             SearchCount--;
             SearchCount = SearchCount < 0 ? 0 : SearchCount;
             label9.Text = SearchCount.ToString();
 
-            if (SearchCount == 0)
-            {
-                timer2.Enabled = false;
-                try
-                {
-                    await RefreshThread();
+            if (SearchCount > 0) return;
 
-                    // 成功したらリセット
-                    searchAttempt = 0;
-                }
-                catch (Exception er)
+            var code = 0;
+            try
+            {
+                timer2Proceccing = true;
+                timer2ProccessStartTime = UnixTime.Now();
+                timer2.Enabled = false;
+
+                await RefreshThread();
+
+                // 成功したらリセット
+                searchAttempt = 0;
+            }
+            catch (Exception er)
+            {
+                var _er = er as AggregateException == null ? er : er.InnerException;
+                WriteLog(_er.Message);
+                searchAttempt++;
+                if (searchAttempt >= 10)
                 {
-                    WriteLog(er.Message);
-                    searchAttempt++;
-                    lastRefreshException = er;
+                    code = 1;
+                    try { await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
                 }
-                finally
-                {
-                    if (searchAttempt < 10)
-                    {
-                        timer2.Enabled = true;
-                        SearchCount = 10;
-                        label9.Text = SearchCount.ToString();
-                        ui.UpdateUI();
-                    }
-                    else
-                    {
-                        await Stop();
-                        try
-                        {
-                            await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止" + (lastRefreshException != null ? "\n" + lastRefreshException.Message : ""));
-                        }
-                        catch { }
-                    }
-                }
+            }
+            finally
+            {
+                timer2Proceccing = false;
+                if (code == 0)
+                    timer2.Enabled = Working;
+                else
+                    await Stop();
+                SearchCount = 10;
+                label9.Text = SearchCount.ToString();
+                ui.UpdateUI();
+                ui.manager.UpdateUI();
             }
         }
 
         private async Task RefreshThread()
         {
-            try
+            await context.FullSearchThread(new Action<int, int>((i, cnt) =>
             {
-                searchProcessStartTime = UnixTime.Now();
-                searchProccesing = true;
-                await context.FullSearchThread(new Action<int, int>((i, cnt) =>
+                if (InvokeRequired)
                 {
-                    if (InvokeRequired)
-                    {
-                        Invoke(new Action(() =>
-                        {
-                            label9.Text = (i + 1) + "/" + cnt;
-                        }));
-                    }
-                    else
+                    Invoke(new Action(() =>
                     {
                         label9.Text = (i + 1) + "/" + cnt;
-                    }
-                }));
-                await SetPower();
-                var fixedPowerList = powerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
-                var newThreads = fixedPowerList.Select(pair => pair.Key).Where(thread => notifiedThreads.All(t => t.Key != thread.Key)).ToList();
-                notifiedThreads.AddRange(newThreads);
-                if (notifiedThreads.Count > 100)
-                {
-                    notifiedThreads = notifiedThreads.GetRange(notifiedThreads.Count - 100, 100);
+                    }));
                 }
-                if (newThreads.Count > 0)
+                else
                 {
-                    foreach (var thread in newThreads)
-                    {
-                        await Network.SendLineMessage("新規スレッドを検知 [" + notifiedThreads.Last().Title + "]");
-                    }
+                    label9.Text = (i + 1) + "/" + cnt;
                 }
-                searchProccesing = false;
-            }
-            finally
+            }));
+            await SetPower();
+            var fixedPowerList = powerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
+            var newThreads = fixedPowerList.Select(pair => pair.Key).Where(thread => notifiedThreads.All(t => t.Key != thread.Key)).ToList();
+            notifiedThreads.AddRange(newThreads);
+            if (notifiedThreads.Count > 100)
             {
-                searchProccesing = false;
+                notifiedThreads = notifiedThreads.GetRange(notifiedThreads.Count - 100, 100);
+            }
+            if (newThreads.Count > 0)
+            {
+                foreach (var thread in newThreads)
+                {
+                    await Network.SendLineMessage("新規スレッドを検知 [" + notifiedThreads.Last().Title + "]");
+                }
             }
         }
 
@@ -275,24 +271,21 @@ namespace ChBot
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Count = 2;
+            PostCount = 2;
         }
 
-        private async Task Proccess()
+        private async Task<int> Proccess()
         {
             try
             {
+                ReportProgress("MAIN_STARTED");
+
                 var current = SetNextCurrent();
                 if (current == null || context.ThreadContext.IsIgnored(current))
                 {
                     WriteResult("");
-                    return;
+                    return 0;
                 }
-
-                ReportProgress("MAIN_STARTED");
-                processStartTime = UnixTime.Now();
-                proceccing = true;
-                timer1.Enabled = false;
 
                 ReportProgress("CHANGE_IP_STARTED");
                 await Network.ChangeIP();
@@ -330,17 +323,18 @@ namespace ChBot
                     {
                         var _er = er as AggregateException == null ? er : er.InnerException;
                         if (_er as PostFailureException == null)
-                            throw _er;
-                        else
-                            await ProcessPostError(current, _er);
+                            throw;
+                        var __er = _er as PostFailureException;
+                        WriteResult(__er.Result);
+                        if (__er.Result.IndexOf("このスレッドには") != -1 && __er.Result.IndexOf("該当する") != -1)
+                            throw;
+                        context.ThreadContext.AddIgnored(current, true);
                     }
                 }
 
-                // 書き込み成功後の処理
-                ReportProgress("POST_COMPLETED");
+                // 書き込み成功時の処理
                 Attempt = 0;
-                proceccing = false;
-                timer1.Enabled = true;
+                ReportProgress("POST_COMPLETED");
                 if (hasLastChance == false)
                 {
                     hasLastChance = true;
@@ -350,39 +344,52 @@ namespace ChBot
                     }
                     catch { }
                 }
+                return 0;
             }
             catch (Exception er)
             {
-                await ProcessError(er);
+                // 書き込み失敗時の処理
+                var _er = er as AggregateException == null ? er : er.InnerException;
+                WriteLog(_er.Message + " " + _er.StackTrace);
+                Attempt++;
+                ReportProgress("MAIN_FAILED");
+                if (Attempt >= 10)
+                {
+                    if (hasLastChance)
+                    {
+                        // リトライ回数が上限を超えたらUSBを再起動してリトライ回数をリセットして再度試す
+                        Attempt = 0;
+                        hasLastChance = false;
+                        try { await Network.SendLineMessage("エラーのためコマンドを試行します"); } catch { }
+                        ReportProgress("RESTART_USB_STARTED");
+                        try { await Network.RestartUsb(); } catch { }
+                        ReportProgress("RESTART_USB_COMPLETED");
+                        return 0;
+                    }
+                    else
+                    {
+                        // それでもリトライ回数が上限を超えたら動作を停止する
+                        ReportProgress("MAIN_FAIL_STOP_COMPLETED");
+                        try
+                        {
+                            await Network.SendLineMessage(ui.InstanceName + ":" + _er.Message);
+                            var message = ResultWebBrowser.Document.Body.InnerText;
+                            if (_er as PostFailureException != null)
+                                await Network.SendLineMessage(message);
+                        }
+                        catch (Exception er2)
+                        {
+                            var _er2 = er2 as AggregateException == null ? er2 : er2.InnerException;
+                            WriteLog(_er2.Message);
+                        }
+                        return 1;
+                    }
+                }
+                return 0;
             }
             finally
             {
                 ReportProgress("MAIN_COMPLETED");
-            }
-        }
-
-        private async Task ProcessPostError(BotThread current, Exception err)
-        {
-            WriteResult((err as PostFailureException).Result);
-
-            if ((err as PostFailureException).Result.IndexOf("このスレッドには") >= 0
-                || (err as PostFailureException).Result.IndexOf("該当する") >= 0
-                || (err as PostFailureException).Result.IndexOf("We hate Continuous") >= 0
-                )
-            {
-                context.ThreadContext.AddIgnored(current, true);
-                if ((err as PostFailureException).Result.IndexOf("We hate Continuous") >= 0)
-                {
-                    try
-                    {
-                        await Network.SendLineMessage("[Info]\n[" + current.Title + "]\n" + (err as PostFailureException).Result);
-                    }
-                    catch { }
-                }
-            }
-            else
-            {
-                throw err as PostFailureException;
             }
         }
 
@@ -400,57 +407,6 @@ namespace ChBot
             current.Wrote = UnixTime.Now();
             context.ThreadContext.GetHistory().Sort(BotThreadList.SortMode.Wrote);
             context.ThreadContext.AddHistory(current);
-        }
-
-        private async Task ProcessError(Exception er)
-        {
-            var err = er as AggregateException == null ? er : er.InnerException;
-
-            Attempt++;
-            proceccing = false;
-
-            WriteLog(err.Message + " " + err.StackTrace);
-
-            ReportProgress("MAIN_FAILED");
-
-            if (Attempt < 10)
-            {
-                timer1.Enabled = true;
-            }
-            else if (hasLastChance)
-            {
-                Attempt = 0;
-                hasLastChance = false;
-
-                ReportProgress("RESTART_USB_STARTED");
-                try
-                {
-                    await Network.SendLineMessage("エラーのためコマンドを試行します");
-                }
-                catch { }
-                ReportProgress("RESTART_USB_COMPLETED");
-
-                await Network.RestartUsb();
-                timer1.Enabled = true;
-            }
-            else
-            {
-                await Stop();
-                ReportProgress("MAIN_FAIL_STOP_COMPLETED");
-
-                try
-                {
-                    await Network.SendLineMessage(ui.InstanceName + ":" + err.Message);
-                    var message = ResultWebBrowser.Document.Body.InnerText;
-                    if (err as PostFailureException != null)
-                        await Network.SendLineMessage(message);
-                }
-                catch (Exception er2)
-                {
-                    var _er2 = er2 as AggregateException == null ? er2 : er2.InnerException;
-                    WriteLog(_er2.Message);
-                }
-            }
         }
 
         private BotThread SetNextCurrent()
@@ -562,7 +518,9 @@ namespace ChBot
                     toolStripLabel1.Text = "";
                     break;
                 case "MAIN_FAILED":
+                    toolStripLabel1.Text = "";
                     label8.Visible = false;
+                    label6.Text = Attempt.ToString() + "/10";
                     break;
                 case "MAIN_FAIL_STOP_COMPLETED":
                     ui.manager.UpdateUI();

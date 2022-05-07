@@ -56,7 +56,7 @@ namespace ChBot
         {
             listView1.Items.Clear();
             var client = context.client;
-            ListViewItem item = new ListViewItem(new[] { "(Direct)", client.Count.ToString(), client.Attempt.ToString() + "/10" });
+            ListViewItem item = new ListViewItem(new[] { "(Direct)", client.PostCount.ToString(), client.Attempt.ToString() + "/10" });
             item.BackColor = client.Working ? Color.Red : Color.White;
             item.ForeColor = client.Working ? Color.White : Color.Black;
             item.Tag = client;
