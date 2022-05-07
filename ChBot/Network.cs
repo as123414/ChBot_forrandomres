@@ -30,7 +30,7 @@ namespace ChBot
         private static string imgUploadServer = "";
         private static string lineRecieveWebhookUrl = "";
         private static string ipGetUrl = "";
-        private static WebProxy passProxy = null;
+        private static IPEndPoint postIPEndPoint = null;
 
         static Network()
         {
@@ -44,7 +44,7 @@ namespace ChBot
             imgUploadServer = lines[1].Trim();
             lineRecieveWebhookUrl = lines[2].Trim();
             ipGetUrl = lines[3].Trim();
-            passProxy = new WebProxy(lines[4].Trim());
+            postIPEndPoint = new IPEndPoint(new IPAddress(lines[4].Trim().Split('.').Select(s => byte.Parse(s)).ToArray()), 0);
         }
 
         //APIのSIDを取得
@@ -64,7 +64,6 @@ namespace ChBot
 
             var url = "https://api.5ch.net/v1/auth/";
             var webReq = (HttpWebRequest)WebRequest.Create(url);
-            webReq.Proxy = passProxy;
             webReq.KeepAlive = false;
             webReq.Method = "POST";
             webReq.ContentType = "application/x-www-form-urlencoded";
@@ -107,7 +106,7 @@ namespace ChBot
             var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
             try
             {
-                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000", proxy: null);
+                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000");
             }
             catch (SigFailureException er)
             {
@@ -130,8 +129,6 @@ namespace ChBot
                 string bbs = r1.Match(url).Groups[2].Value;
 
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://" + server + "/" + bbs + "/subject.txt");
-                if (!server.Contains("open2ch.net"))
-                    req.Proxy = passProxy;
                 req.KeepAlive = false;
                 req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62";
 
@@ -198,7 +195,7 @@ namespace ChBot
         }
 
         //レス投稿
-        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey, WebProxy proxy = null)
+        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey)
         {
             var profile = getProfileNumber(userAgent);
             var bbs = thread.Bbs;
@@ -250,7 +247,7 @@ namespace ChBot
             var data = Encoding.ASCII.GetBytes(parameters);
 
             var mona = new List<string>() { "" };
-            var html = await Send(server, data, referer, proxy, bbs, key, name, mail, message, "", time, userAgent, monakey, mona);
+            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, userAgent, monakey, mona);
 
             var body = Regex.Match(html, @"<body[^>]*>(.+)</body>", RegexOptions.Singleline).Value;
 
@@ -266,7 +263,7 @@ namespace ChBot
         }
 
         //スレ立て
-        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey, WebProxy proxy = null)
+        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey)
         {
             var profile = getProfileNumber(userAgent);
             var time = UnixTime.Now();
@@ -313,7 +310,7 @@ namespace ChBot
             var parameters = string.Join("&", pDict.Select(p => p.Key + "=" + Encode(p.Value)));
             var data = Encoding.ASCII.GetBytes(parameters);
 
-            var str = await Send(server, data, referer, proxy, bbs, -1, name, mail, message, title, time, userAgent, monaKey);
+            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, userAgent, monaKey);
 
             string html = "";
             Regex r = new Regex(@"<body[^>]*>(.+)</body>", RegexOptions.Singleline);
@@ -332,7 +329,7 @@ namespace ChBot
         }
 
         //bbs.cgiに送信
-        private static async Task<string> Send(string server, byte[] data, string referer, WebProxy proxy, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, List<string> mona = null)
+        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, List<string> mona = null)
         {
             var profile = getProfileNumber(userAgent);
             string nonce, HMKey, AppKey;
@@ -424,8 +421,14 @@ namespace ChBot
                     throw new Exception("Unimplemented useragent.");
             }
 
-            if (proxy != null)
-                webReq.Proxy = proxy;
+            webReq.Proxy = null;
+            webReq.ServicePoint.BindIPEndPointDelegate = delegate (
+                ServicePoint servicePoint,
+                IPEndPoint remoteEndPoint,
+                int retryCount)
+            {
+                return postIPEndPoint;
+            };
 
             webReq.Host = server;
             webReq.ContentLength = data.Length;
@@ -488,7 +491,6 @@ namespace ChBot
 
                 var url = "https://api.5ch.net/v1/" + thread.Server.Split('.')[0] + "/" + thread.Bbs + "/" + thread.Key.ToString();
                 var webReq = (HttpWebRequest)WebRequest.Create(url);
-                webReq.Proxy = passProxy;
                 webReq.KeepAlive = false;
                 webReq.Method = "POST";
                 webReq.AutomaticDecompression = DecompressionMethods.GZip;
@@ -682,6 +684,15 @@ namespace ChBot
             var req = (HttpWebRequest)WebRequest.Create(ipGetUrl);
             req.KeepAlive = false;
 
+            req.Proxy = null;
+            req.ServicePoint.BindIPEndPointDelegate = delegate (
+                ServicePoint servicePoint,
+                IPEndPoint remoteEndPoint,
+                int retryCount)
+            {
+                return postIPEndPoint;
+            };
+
             using (var res = await req.GetResponseAsync().Timeout(10000))
             using (var st = res.GetResponseStream())
             {
@@ -719,7 +730,6 @@ namespace ChBot
             req.ContentType = "application/json";
             req.ContentLength = postDataBytes.Length;
             req.Headers.Set("Authorization", "Bearer " + lineAuth.Trim());
-            req.Proxy = passProxy;
 
             //データをPOST送信するためのStreamを取得
             using (var reqStream = await req.GetRequestStreamAsync().Timeout(10000))
@@ -762,7 +772,6 @@ namespace ChBot
             req.ContentType = "application/json";
             req.ContentLength = postDataBytes.Length;
             req.Headers.Set("Authorization", "Bearer " + lineAuth.Trim());
-            req.Proxy = passProxy;
 
             //データをPOST送信するためのStreamを取得
             using (var reqStream = await req.GetRequestStreamAsync().Timeout(10000))
