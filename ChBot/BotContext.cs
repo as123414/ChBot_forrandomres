@@ -97,6 +97,9 @@ namespace ChBot
             UAMonaKeyPairs = new List<UAMonaKeyPair>();
             for (var i = 0; i < 50; i++)
             {
+                if (i % 4 == 0)
+                    await Network.ChangeIP();
+
                 var ua = Network.GetRandomUseragent(UA.ChMate);
                 var mona = await Network.GetMonaKey(ua);
                 /*var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
