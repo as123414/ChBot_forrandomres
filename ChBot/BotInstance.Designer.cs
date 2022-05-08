@@ -74,6 +74,7 @@
             this.splitContainer6 = new System.Windows.Forms.SplitContainer();
             this.panel7 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.button18 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
@@ -106,7 +107,9 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SelectDBFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.button18 = new System.Windows.Forms.Button();
+            this.button19 = new System.Windows.Forms.Button();
+            this.button20 = new System.Windows.Forms.Button();
+            this.button21 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.IntervalNumericUpDown)).BeginInit();
             this.ThreadLlistContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -146,7 +149,7 @@
             this.MessageTextBox.Multiline = true;
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.MessageTextBox.Size = new System.Drawing.Size(222, 234);
+            this.MessageTextBox.Size = new System.Drawing.Size(222, 235);
             this.MessageTextBox.TabIndex = 0;
             this.MessageTextBox.WordWrap = false;
             this.MessageTextBox.TextChanged += new System.EventHandler(this.MessageTextBox_TextChanged);
@@ -172,7 +175,7 @@
             this.ResultWebBrowser.Name = "ResultWebBrowser";
             this.ResultWebBrowser.ScriptErrorsSuppressed = true;
             this.ResultWebBrowser.ScrollBarsEnabled = false;
-            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 232);
+            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 233);
             this.ResultWebBrowser.TabIndex = 3;
             // 
             // IntervalNumericUpDown
@@ -205,7 +208,7 @@
             this.ThreadListListView.Margin = new System.Windows.Forms.Padding(2);
             this.ThreadListListView.Name = "ThreadListListView";
             this.ThreadListListView.ShowItemToolTips = true;
-            this.ThreadListListView.Size = new System.Drawing.Size(391, 234);
+            this.ThreadListListView.Size = new System.Drawing.Size(391, 235);
             this.ThreadListListView.TabIndex = 14;
             this.toolTip1.SetToolTip(this.ThreadListListView, "赤 - 有効\r\n黄 - 現在の書き込み対象\r\n灰 - 無視されます");
             this.ThreadListListView.UseCompatibleStateImageBehavior = false;
@@ -588,7 +591,7 @@
             // 
             this.splitContainer6.Panel2.Controls.Add(this.panel2);
             this.splitContainer6.Size = new System.Drawing.Size(855, 65);
-            this.splitContainer6.SplitterDistance = 493;
+            this.splitContainer6.SplitterDistance = 494;
             this.splitContainer6.SplitterWidth = 3;
             this.splitContainer6.TabIndex = 52;
             // 
@@ -615,8 +618,20 @@
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(2);
-            this.panel2.Size = new System.Drawing.Size(359, 65);
+            this.panel2.Size = new System.Drawing.Size(358, 65);
             this.panel2.TabIndex = 13;
+            // 
+            // button18
+            // 
+            this.button18.AutoSize = true;
+            this.button18.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button18.Location = new System.Drawing.Point(247, 3);
+            this.button18.Margin = new System.Windows.Forms.Padding(2, 1, 2, 2);
+            this.button18.Name = "button18";
+            this.button18.Size = new System.Drawing.Size(50, 26);
+            this.button18.TabIndex = 63;
+            this.button18.Text = "ロード";
+            this.button18.Click += new System.EventHandler(this.button18_Click);
             // 
             // button6
             // 
@@ -645,6 +660,9 @@
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.button21);
+            this.splitContainer2.Panel2.Controls.Add(this.button20);
+            this.splitContainer2.Panel2.Controls.Add(this.button19);
             this.splitContainer2.Panel2.Controls.Add(this.button17);
             this.splitContainer2.Panel2.Controls.Add(this.button5);
             this.splitContainer2.Panel2.Controls.Add(this.button4);
@@ -684,7 +702,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.LoginButton);
             this.splitContainer2.Panel2.Padding = new System.Windows.Forms.Padding(2);
             this.splitContainer2.Size = new System.Drawing.Size(855, 536);
-            this.splitContainer2.SplitterDistance = 234;
+            this.splitContainer2.SplitterDistance = 235;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 15;
             // 
@@ -703,7 +721,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(855, 234);
+            this.splitContainer3.Size = new System.Drawing.Size(855, 235);
             this.splitContainer3.SplitterDistance = 222;
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
@@ -722,7 +740,7 @@
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.MessageTextBox);
-            this.splitContainer5.Size = new System.Drawing.Size(222, 234);
+            this.splitContainer5.Size = new System.Drawing.Size(222, 235);
             this.splitContainer5.SplitterDistance = 25;
             this.splitContainer5.SplitterWidth = 3;
             this.splitContainer5.TabIndex = 1;
@@ -742,7 +760,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.ThreadListListView);
-            this.splitContainer4.Size = new System.Drawing.Size(630, 234);
+            this.splitContainer4.Size = new System.Drawing.Size(630, 235);
             this.splitContainer4.SplitterDistance = 236;
             this.splitContainer4.SplitterWidth = 3;
             this.splitContainer4.TabIndex = 0;
@@ -755,7 +773,7 @@
             this.panel6.Location = new System.Drawing.Point(0, 0);
             this.panel6.Margin = new System.Windows.Forms.Padding(2);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(236, 234);
+            this.panel6.Size = new System.Drawing.Size(236, 235);
             this.panel6.TabIndex = 4;
             // 
             // button17
@@ -1049,17 +1067,44 @@
             this.timer1.Interval = 43200000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // button18
+            // button19
             // 
-            this.button18.AutoSize = true;
-            this.button18.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button18.Location = new System.Drawing.Point(247, 3);
-            this.button18.Margin = new System.Windows.Forms.Padding(2, 1, 2, 2);
-            this.button18.Name = "button18";
-            this.button18.Size = new System.Drawing.Size(50, 26);
-            this.button18.TabIndex = 63;
-            this.button18.Text = "ロード";
-            this.button18.Click += new System.EventHandler(this.button18_Click);
+            this.button19.AutoSize = true;
+            this.button19.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button19.Location = new System.Drawing.Point(338, 85);
+            this.button19.Margin = new System.Windows.Forms.Padding(2);
+            this.button19.Name = "button19";
+            this.button19.Size = new System.Drawing.Size(76, 25);
+            this.button19.TabIndex = 122;
+            this.button19.Text = "Get Mona d";
+            this.button19.UseVisualStyleBackColor = true;
+            this.button19.Click += new System.EventHandler(this.button19_Click);
+            // 
+            // button20
+            // 
+            this.button20.AutoSize = true;
+            this.button20.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button20.Location = new System.Drawing.Point(338, 114);
+            this.button20.Margin = new System.Windows.Forms.Padding(2);
+            this.button20.Name = "button20";
+            this.button20.Size = new System.Drawing.Size(76, 25);
+            this.button20.TabIndex = 123;
+            this.button20.Text = "Post time d";
+            this.button20.UseVisualStyleBackColor = true;
+            this.button20.Click += new System.EventHandler(this.button20_Click);
+            // 
+            // button21
+            // 
+            this.button21.AutoSize = true;
+            this.button21.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button21.Location = new System.Drawing.Point(338, 144);
+            this.button21.Margin = new System.Windows.Forms.Padding(2);
+            this.button21.Name = "button21";
+            this.button21.Size = new System.Drawing.Size(76, 25);
+            this.button21.TabIndex = 124;
+            this.button21.Text = "Get IP d";
+            this.button21.UseVisualStyleBackColor = true;
+            this.button21.Click += new System.EventHandler(this.button21_Click);
             // 
             // BotInstance
             // 
@@ -1189,5 +1234,8 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button17;
         private System.Windows.Forms.Button button18;
+        private System.Windows.Forms.Button button21;
+        private System.Windows.Forms.Button button20;
+        private System.Windows.Forms.Button button19;
     }
 }

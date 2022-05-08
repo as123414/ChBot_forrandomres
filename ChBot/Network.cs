@@ -101,12 +101,12 @@ namespace ChBot
             return apiSid;
         }
 
-        public static async Task<string> GetMonaKey(string userAgent)
+        public static async Task<string> GetMonaKey(string userAgent, bool useMobile = true)
         {
             var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
             try
             {
-                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000");
+                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000", useMobile: useMobile);
             }
             catch (SigFailureException er)
             {
@@ -195,7 +195,7 @@ namespace ChBot
         }
 
         //レス投稿
-        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey)
+        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey, bool useMobile = true)
         {
             var profile = getProfileNumber(userAgent);
             var bbs = thread.Bbs;
@@ -247,7 +247,7 @@ namespace ChBot
             var data = Encoding.ASCII.GetBytes(parameters);
 
             var mona = new List<string>() { "" };
-            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, userAgent, monakey, mona);
+            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, userAgent, monakey, mona: mona, useMobile: useMobile);
 
             var body = Regex.Match(html, @"<body[^>]*>(.+)</body>", RegexOptions.Singleline).Value;
 
@@ -263,7 +263,7 @@ namespace ChBot
         }
 
         //スレ立て
-        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey)
+        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey, bool useMobile = true)
         {
             var profile = getProfileNumber(userAgent);
             var time = UnixTime.Now();
@@ -310,7 +310,7 @@ namespace ChBot
             var parameters = string.Join("&", pDict.Select(p => p.Key + "=" + Encode(p.Value)));
             var data = Encoding.ASCII.GetBytes(parameters);
 
-            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, userAgent, monaKey);
+            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, userAgent, monaKey, useMobile: useMobile);
 
             string html = "";
             Regex r = new Regex(@"<body[^>]*>(.+)</body>", RegexOptions.Singleline);
@@ -329,7 +329,7 @@ namespace ChBot
         }
 
         //bbs.cgiに送信
-        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, List<string> mona = null)
+        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, List<string> mona = null, bool useMobile = true)
         {
             var profile = getProfileNumber(userAgent);
             string nonce, HMKey, AppKey;
@@ -421,14 +421,17 @@ namespace ChBot
                     throw new Exception("Unimplemented useragent.");
             }
 
-            webReq.Proxy = null;
-            webReq.ServicePoint.BindIPEndPointDelegate = delegate (
-                ServicePoint servicePoint,
-                IPEndPoint remoteEndPoint,
-                int retryCount)
+            if (useMobile)
             {
-                return postIPEndPoint;
-            };
+                webReq.Proxy = null;
+                webReq.ServicePoint.BindIPEndPointDelegate = delegate (
+                    ServicePoint servicePoint,
+                    IPEndPoint remoteEndPoint,
+                    int retryCount)
+                {
+                    return postIPEndPoint;
+                };
+            }
 
             webReq.Host = server;
             webReq.ContentLength = data.Length;
@@ -692,19 +695,22 @@ namespace ChBot
             await Task.Delay(500);
         }
 
-        public static async Task<string> GetIPAddress()
+        public static async Task<string> GetIPAddress(bool useMobile = true)
         {
             var req = (HttpWebRequest)WebRequest.Create(ipGetUrl);
             req.KeepAlive = false;
 
-            req.Proxy = null;
-            req.ServicePoint.BindIPEndPointDelegate = delegate (
-                ServicePoint servicePoint,
-                IPEndPoint remoteEndPoint,
-                int retryCount)
+            if (useMobile)
             {
-                return postIPEndPoint;
-            };
+                req.Proxy = null;
+                req.ServicePoint.BindIPEndPointDelegate = delegate (
+                    ServicePoint servicePoint,
+                    IPEndPoint remoteEndPoint,
+                    int retryCount)
+                {
+                    return postIPEndPoint;
+                };
+            }
 
             using (var res = await req.GetResponseAsync().Timeout(10000))
             using (var st = res.GetResponseStream())

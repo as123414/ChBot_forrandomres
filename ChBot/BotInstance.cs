@@ -917,5 +917,59 @@ namespace ChBot
             MessageBox.Show("ロードしました。");
             UpdateUI(UIParts.Other);
         }
+
+        private async void button19_Click(object sender, EventArgs e)
+        {
+            button19.Enabled = false;
+
+            try
+            {
+                var target = context.ThreadContext.GetCurrent();
+                context.UserAgent = Network.GetRandomUseragent(UA.ChMate);
+                context.MonaKey = await Network.GetMonaKey(context.UserAgent, useMobile: false);
+                MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
+            }
+            catch (Exception er)
+            {
+                MessageBox.Show(er.Message);
+                if (er as PostFailureException != null)
+                    MessageBox.Show(((PostFailureException)er).Result);
+            }
+
+            button19.Enabled = true;
+        }
+
+        private async void button20_Click(object sender, EventArgs e)
+        {
+            button20.Enabled = false;
+
+            try
+            {
+                var target = context.ThreadContext.GetCurrent();
+                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey, useMobile: false);
+            }
+            catch (Exception er)
+            {
+                MessageBox.Show(er.Message);
+                if (er as PostFailureException != null)
+                    MessageBox.Show(((PostFailureException)er).Result);
+            }
+
+            button20.Enabled = true;
+        }
+
+        private async void button21_Click(object sender, EventArgs e)
+        {
+            button21.Enabled = false;
+            try
+            {
+                MessageBox.Show(await Network.GetIPAddress(useMobile: false));
+            }
+            catch (Exception er)
+            {
+                MessageBox.Show(er.Message);
+            }
+            button21.Enabled = true;
+        }
     }
 }
