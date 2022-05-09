@@ -97,7 +97,7 @@ namespace ChBot
             UAMonaKeyPairs = new List<UAMonaKeyPair>();
             for (var i = 0; i < 50; i++)
             {
-                if (i % 4 == 0)
+                if (i % 5 == 0)
                     await Network.ChangeIP();
 
                 var ua = Network.GetRandomUseragent(UA.ChMate);
