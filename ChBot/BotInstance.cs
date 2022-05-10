@@ -26,6 +26,8 @@ namespace ChBot
         public BotInstance(string name, InstanceManager manager)
         {
             InitializeComponent();
+            comboBox1.Items.AddRange(Network.DeviceIDList.ToArray());
+            comboBox1.SelectedIndex = 1;
             InstanceName = name;
             this.manager = manager;
             context = new BotContext(this);
@@ -598,7 +600,7 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey);
+                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -717,7 +719,7 @@ namespace ChBot
             button1.Enabled = false;
             try
             {
-                MessageBox.Show(await Network.GetIPAddress());
+                MessageBox.Show(await Network.GetIPAddress(comboBox1.SelectedIndex - 1));
             }
             catch (Exception er)
             {
@@ -733,7 +735,7 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, context.Message, context.Name, context.Mail, context.UserAgent, context.MonaKey);
+                await Network.Post(target, context.Message, context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -770,7 +772,7 @@ namespace ChBot
                 var tasks = new List<Task>();
                 for (var i = 0; i < 3; i++)
                 {
-                    tasks.Add(Network.Post(target, Generator.makeKanjiRandom(), context.Name, context.Mail, context.UserAgent, context.MonaKey));
+                    tasks.Add(Network.Post(target, Generator.makeKanjiRandom(), context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1));
                 }
                 await Task.WhenAll(tasks);
             }
@@ -801,15 +803,27 @@ namespace ChBot
 
         private async void button15_Click(object sender, EventArgs e)
         {
+            if (comboBox1.SelectedIndex == 0)
+            {
+                MessageBox.Show("デバイスを選んでください");
+                return;
+            }
+
             button15.Enabled = false;
-            await Network.RestartUsb();
+            await Network.RestartUsb(comboBox1.SelectedIndex - 1);
             button15.Enabled = true;
         }
 
         private async void button7_Click(object sender, EventArgs e)
         {
+            if (comboBox1.SelectedIndex == 0)
+            {
+                MessageBox.Show("デバイスを選んでください");
+                return;
+            }
+
             button7.Enabled = false;
-            await Network.ChangeIP(1);
+            await Network.ChangeIP(comboBox1.SelectedIndex - 1);
             button7.Enabled = true;
         }
 
@@ -821,7 +835,7 @@ namespace ChBot
             {
                 var target = context.ThreadContext.GetCurrent();
                 context.UserAgent = Network.GetRandomUseragent(UA.ChMate);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent);
+                context.MonaKey = await Network.GetMonaKey(context.UserAgent, comboBox1.SelectedIndex - 1);
                 MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
             }
             catch (Exception er)
@@ -858,7 +872,7 @@ namespace ChBot
             {
                 var target = context.ThreadContext.GetCurrent();
                 context.UserAgent = Network.GetRandomUseragent(UA.X2chGear);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent);
+                context.MonaKey = await Network.GetMonaKey(context.UserAgent, comboBox1.SelectedIndex - 1);
                 MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
             }
             catch (Exception er)
@@ -878,7 +892,7 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                await Network.Build("mi.5ch.net", "news4vip", UnixTime.Now().ToString(), UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey);
+                await Network.Build("mi.5ch.net", "news4vip", UnixTime.Now().ToString(), UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -898,7 +912,7 @@ namespace ChBot
             {
                 var target = context.ThreadContext.GetCurrent();
                 context.UserAgent = Network.GetRandomUseragent(UA.JaneStyleWin);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent);
+                context.MonaKey = await Network.GetMonaKey(context.UserAgent, comboBox1.SelectedIndex - 1);
                 MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
             }
             catch (Exception er)
@@ -916,60 +930,6 @@ namespace ChBot
             context.LoadSettings();
             MessageBox.Show("ロードしました。");
             UpdateUI(UIParts.Other);
-        }
-
-        private async void button19_Click(object sender, EventArgs e)
-        {
-            button19.Enabled = false;
-
-            try
-            {
-                var target = context.ThreadContext.GetCurrent();
-                context.UserAgent = Network.GetRandomUseragent(UA.ChMate);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent, useMobile: false);
-                MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
-            }
-            catch (Exception er)
-            {
-                MessageBox.Show(er.Message);
-                if (er as PostFailureException != null)
-                    MessageBox.Show(((PostFailureException)er).Result);
-            }
-
-            button19.Enabled = true;
-        }
-
-        private async void button20_Click(object sender, EventArgs e)
-        {
-            button20.Enabled = false;
-
-            try
-            {
-                var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey, useMobile: false);
-            }
-            catch (Exception er)
-            {
-                MessageBox.Show(er.Message);
-                if (er as PostFailureException != null)
-                    MessageBox.Show(((PostFailureException)er).Result);
-            }
-
-            button20.Enabled = true;
-        }
-
-        private async void button21_Click(object sender, EventArgs e)
-        {
-            button21.Enabled = false;
-            try
-            {
-                MessageBox.Show(await Network.GetIPAddress(useMobile: false));
-            }
-            catch (Exception er)
-            {
-                MessageBox.Show(er.Message);
-            }
-            button21.Enabled = true;
         }
     }
 }

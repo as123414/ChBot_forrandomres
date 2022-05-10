@@ -98,10 +98,10 @@ namespace ChBot
             for (var i = 0; i < 50; i++)
             {
                 if (i % 5 == 0)
-                    await Network.ChangeIP();
+                    await Network.ChangeIP(0);
 
                 var ua = Network.GetRandomUseragent(UA.ChMate);
-                var mona = await Network.GetMonaKey(ua);
+                var mona = await Network.GetMonaKey(ua, 0);
                 /*var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
                 try
                 {

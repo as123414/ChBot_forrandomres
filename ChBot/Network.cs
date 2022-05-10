@@ -30,7 +30,8 @@ namespace ChBot
         private static string imgUploadServer = "";
         private static string lineRecieveWebhookUrl = "";
         private static string ipGetUrl = "";
-        private static IPEndPoint postIPEndPoint = null;
+        public static List<string> DeviceIDList = new List<string>();
+        private static List<IPEndPoint> postIPEndPointList = new List<IPEndPoint>();
 
         static Network()
         {
@@ -44,7 +45,8 @@ namespace ChBot
             imgUploadServer = lines[1].Trim();
             lineRecieveWebhookUrl = lines[2].Trim();
             ipGetUrl = lines[3].Trim();
-            postIPEndPoint = new IPEndPoint(new IPAddress(lines[4].Trim().Split('.').Select(s => byte.Parse(s)).ToArray()), 0);
+            DeviceIDList.AddRange(lines[4].Trim().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()));
+            postIPEndPointList.AddRange(lines[5].Trim().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => new IPEndPoint(new IPAddress(s.Trim().Split('.').Select(ss => byte.Parse(ss)).ToArray()), 0)));
         }
 
         //APIのSIDを取得
@@ -101,12 +103,12 @@ namespace ChBot
             return apiSid;
         }
 
-        public static async Task<string> GetMonaKey(string userAgent, bool useMobile = true)
+        public static async Task<string> GetMonaKey(string userAgent, int deviceIndex)
         {
             var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
             try
             {
-                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000", useMobile: useMobile);
+                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000", deviceIndex);
             }
             catch (SigFailureException er)
             {
@@ -195,7 +197,7 @@ namespace ChBot
         }
 
         //レス投稿
-        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey, bool useMobile = true)
+        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey, int deviceIndex)
         {
             var profile = getProfileNumber(userAgent);
             var bbs = thread.Bbs;
@@ -247,7 +249,7 @@ namespace ChBot
             var data = Encoding.ASCII.GetBytes(parameters);
 
             var mona = new List<string>() { "" };
-            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, userAgent, monakey, mona: mona, useMobile: useMobile);
+            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, userAgent, monakey, deviceIndex, mona: mona);
 
             var body = Regex.Match(html, @"<body[^>]*>(.+)</body>", RegexOptions.Singleline).Value;
 
@@ -263,7 +265,7 @@ namespace ChBot
         }
 
         //スレ立て
-        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey, bool useMobile = true)
+        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey, int deviceIndex)
         {
             var profile = getProfileNumber(userAgent);
             var time = UnixTime.Now();
@@ -310,7 +312,7 @@ namespace ChBot
             var parameters = string.Join("&", pDict.Select(p => p.Key + "=" + Encode(p.Value)));
             var data = Encoding.ASCII.GetBytes(parameters);
 
-            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, userAgent, monaKey, useMobile: useMobile);
+            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, userAgent, monaKey, deviceIndex);
 
             string html = "";
             Regex r = new Regex(@"<body[^>]*>(.+)</body>", RegexOptions.Singleline);
@@ -329,7 +331,7 @@ namespace ChBot
         }
 
         //bbs.cgiに送信
-        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, List<string> mona = null, bool useMobile = true)
+        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, int deviceIndex, List<string> mona = null)
         {
             var profile = getProfileNumber(userAgent);
             string nonce, HMKey, AppKey;
@@ -421,7 +423,7 @@ namespace ChBot
                     throw new Exception("Unimplemented useragent.");
             }
 
-            if (useMobile)
+            if (deviceIndex >= 0)
             {
                 webReq.Proxy = null;
                 webReq.ServicePoint.BindIPEndPointDelegate = delegate (
@@ -429,7 +431,7 @@ namespace ChBot
                     IPEndPoint remoteEndPoint,
                     int retryCount)
                 {
-                    return postIPEndPoint;
+                    return postIPEndPointList[deviceIndex];
                 };
             }
 
@@ -666,41 +668,39 @@ namespace ChBot
             return DatToResList(jsonstr);
         }
 
-        public static async Task ChangeIP(int device = 1)
+        public static async Task ChangeIP(int deviceIndex)
         {
             await Task.Run(() =>
             {
                 using (var invoker = new RunspaceInvoke())
                 {
-                    if (device == 1)
-                        invoker.Invoke("adb shell svc data disable; adb shell svc data enable\r\n");
-                    else
-                        invoker.Invoke("adb -s YT9112MDXE shell settings put global airplane_mode_on 1; adb -s YT9112MDXE shell am broadcast -a android.intent.action.AIRPLANE_MODE; adb -s YT9112MDXE shell settings put global airplane_mode_on 0; adb -s YT9112MDXE shell am broadcast -a android.intent.action.AIRPLANE_MODE\r\n");
+                    invoker.Invoke("adb -s " + DeviceIDList[deviceIndex] + " shell svc data disable; adb -s " + DeviceIDList[deviceIndex] + " shell svc data enable\r\n");
+                    //invoker.Invoke("adb -s " + DeviceIDList[deviceIndex] + " shell settings put global airplane_mode_on 1; adb -s " + DeviceIDList[deviceIndex] + " shell am broadcast -a android.intent.action.AIRPLANE_MODE; adb -s " + DeviceIDList[deviceIndex] + " shell settings put global airplane_mode_on 0; adb -s " + DeviceIDList[deviceIndex] + " shell am broadcast -a android.intent.action.AIRPLANE_MODE\r\n");
                 }
             });
 
             await Task.Delay(500);
         }
 
-        public static async Task DisableWiFi()
+        public static async Task DisableWiFi(int deviceIndex)
         {
             await Task.Run(() =>
             {
                 using (var invoker = new RunspaceInvoke())
                 {
-                    invoker.Invoke("adb shell svc wifi disable\r\n");
+                    invoker.Invoke("adb -s " + DeviceIDList[deviceIndex] + " shell svc wifi disable\r\n");
                 }
             });
 
             await Task.Delay(500);
         }
 
-        public static async Task<string> GetIPAddress(bool useMobile = true)
+        public static async Task<string> GetIPAddress(int deviceIndex)
         {
             var req = (HttpWebRequest)WebRequest.Create(ipGetUrl);
             req.KeepAlive = false;
 
-            if (useMobile)
+            if (deviceIndex >= 0)
             {
                 req.Proxy = null;
                 req.ServicePoint.BindIPEndPointDelegate = delegate (
@@ -708,7 +708,7 @@ namespace ChBot
                     IPEndPoint remoteEndPoint,
                     int retryCount)
                 {
-                    return postIPEndPoint;
+                    return postIPEndPointList[deviceIndex];
                 };
             }
 
@@ -718,7 +718,6 @@ namespace ChBot
                 using (var srm = new StreamReader(st))
                 {
                     return (await srm.ReadToEndAsync().Timeout(10000)).Trim();
-                    //return (await srm.ReadToEndAsync().Timeout(10000)).Replace("<html><head><title>Current IP Check</title></head><body>Current IP Address: ", "").Replace("</body></html>\r\n", "");
                 }
             }
         }
@@ -828,13 +827,13 @@ namespace ChBot
             }
         }
 
-        public static async Task RestartUsb()
+        public static async Task RestartUsb(int deviceIndex)
         {
             await Task.Run(() =>
             {
                 using (var invoker = new RunspaceInvoke())
                 {
-                    invoker.Invoke("adb usb\r\n");
+                    invoker.Invoke("adb -s " + DeviceIDList[deviceIndex] + " usb\r\n");
                 }
             });
 

@@ -288,7 +288,7 @@ namespace ChBot
                 }
 
                 ReportProgress("CHANGE_IP_STARTED");
-                await Network.ChangeIP();
+                await Network.ChangeIP(0);
                 ReportProgress("CHANGE_IP_COMPLETED");
 
                 if (context.HomeIP.Split('.').Length == 4)
@@ -316,7 +316,7 @@ namespace ChBot
 
                     try
                     {
-                        var result = await Network.Post(current, context.Message, context.Name, context.Mail, context.UserAgent, context.MonaKey);
+                        var result = await Network.Post(current, context.Message, context.Name, context.Mail, context.UserAgent, context.MonaKey, 0);
                         WriteResult(result);
                     }
                     catch (Exception er)
@@ -362,7 +362,7 @@ namespace ChBot
                         hasLastChance = false;
                         try { await Network.SendLineMessage("エラーのためコマンドを試行します"); } catch { }
                         ReportProgress("RESTART_USB_STARTED");
-                        try { await Network.RestartUsb(); } catch { }
+                        try { await Network.RestartUsb(0); } catch { }
                         ReportProgress("RESTART_USB_COMPLETED");
                         return 0;
                     }
@@ -440,7 +440,7 @@ namespace ChBot
 
         private async Task CheckIP()
         {
-            var ip = await Network.GetIPAddress();
+            var ip = await Network.GetIPAddress(0);
 
             if (
                    (ip.Split('.')[0] == context.HomeIP.Split('.')[0] || context.HomeIP.Split('.')[0] == "*")
