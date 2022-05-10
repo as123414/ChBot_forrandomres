@@ -259,6 +259,9 @@ namespace ChBot
 
             if (cond1 || cond2 || cond3)
             {
+#if DEBUG
+                return;
+#endif
                 Close();
                 Properties.Settings.Default.IsRestart = true;
                 Properties.Settings.Default.Save();
