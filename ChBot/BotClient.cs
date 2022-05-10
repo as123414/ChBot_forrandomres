@@ -326,7 +326,7 @@ namespace ChBot
                             throw;
                         var __er = _er as PostFailureException;
                         WriteResult(__er.Result);
-                        if (__er.Result.IndexOf("このスレッドには") != -1 && __er.Result.IndexOf("該当する") != -1)
+                        if (__er.Result.IndexOf("このスレッドには") == -1 && __er.Result.IndexOf("該当する") == -1)
                             throw;
                         context.ThreadContext.AddIgnored(current, true);
                     }
