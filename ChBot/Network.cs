@@ -36,6 +36,7 @@ namespace ChBot
         static Network()
         {
             ServicePointManager.Expect100Continue = false;
+            ServicePointManager.MaxServicePointIdleTime = 0;
         }
 
         public static void LoadConfig()
