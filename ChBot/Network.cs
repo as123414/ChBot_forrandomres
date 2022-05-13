@@ -546,10 +546,10 @@ namespace ChBot
             }
             catch (WebException er)
             {
-                if (er.Status == WebExceptionStatus.ProtocolError)
+                if (er.Status == WebExceptionStatus.ProtocolError && enableRange)
                 {
-                    var errres = (HttpWebResponse)er.Response;
-                    if (errres.StatusCode == HttpStatusCode.NotImplemented)
+                    var errRes = (HttpWebResponse)er.Response;
+                    if (errRes.StatusCode == HttpStatusCode.NotImplemented || errRes.StatusCode == HttpStatusCode.NotFound)
                         return await GetDat(thread, apiSid, enableRange: false);
                     else
                         throw;
