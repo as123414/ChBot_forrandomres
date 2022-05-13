@@ -18,6 +18,7 @@ namespace ChBot
 
         public SearchConditionsForm(BotContext context)
         {
+            disableEvents = true;
             this.context = context;
             InitializeComponent();
         }
@@ -30,6 +31,7 @@ namespace ChBot
 
         private void SearchConditionsForm_Shown(object sender, EventArgs e)
         {
+            disableEvents = false;
             UpdateUI();
         }
 
@@ -62,6 +64,7 @@ namespace ChBot
 
         public void ListUpSearchConditions()
         {
+            var prevDisableEvents = disableEvents;
             disableEvents = true;
 
             var selectedIndex = 0;
@@ -81,6 +84,10 @@ namespace ChBot
                     condition.BodySearchText,
                     condition.NameSearchText
                 });
+
+                item.Checked = condition.Enabled;
+                if (!condition.Enabled)
+                    item.BackColor = Color.Silver;
                 item.Tag = condition;
                 listView1.Items.AddRange(new[] { item });
             }
@@ -89,7 +96,7 @@ namespace ChBot
             listView1.Items[newSelectedIndex].Selected = true;
             selectedSearchCondition = (SearchCondition)listView1.Items[newSelectedIndex].Tag;
 
-            disableEvents = false;
+            disableEvents = prevDisableEvents;
         }
 
         public void UpdateUI()
@@ -101,6 +108,7 @@ namespace ChBot
         //状態を表示
         public void displaySelectedSearchCondition()
         {
+            var prevDisableEvents = disableEvents;
             disableEvents = true;
 
             UrlTextBox.Text = selectedSearchCondition.Url;
@@ -124,7 +132,7 @@ namespace ChBot
 
             ApplySearchModeRadioButtton();
 
-            disableEvents = false;
+            disableEvents = prevDisableEvents;
         }
 
         //貼り付け
@@ -357,6 +365,15 @@ namespace ChBot
                 return;
 
             selectedSearchCondition.NeedMatchCount = (int)NeedMatchCountNumericUpDown.Value;
+            ListUpSearchConditions();
+        }
+
+        private void listView1_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (disableEvents)
+                return;
+
+            ((SearchCondition)listView1.Items[e.Index].Tag).Enabled = e.NewValue == CheckState.Checked;
             ListUpSearchConditions();
         }
     }

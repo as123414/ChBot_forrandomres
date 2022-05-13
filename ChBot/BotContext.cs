@@ -124,7 +124,7 @@ namespace ChBot
         public async Task SearchThread()
         {
             var allThreads = await Network.GetThreadList(Board);
-            var searchResult = allThreads.Where(thread => SearchConditions.Any(condition => condition.IsMatchLiteCondition(thread))).ToBotThreadList();
+            var searchResult = allThreads.Where(thread => SearchConditions.Where(condition => condition.Enabled).Any(condition => condition.IsMatchLiteCondition(thread))).ToBotThreadList();
             searchResult.Sort();
             var current = ThreadContext.GetCurrent();
             ThreadContext.ClearEnabled();
@@ -151,6 +151,9 @@ namespace ChBot
                 var isMatch = false;
                 foreach (var condition in SearchConditions)
                 {
+                    if (!condition.Enabled)
+                        continue;
+
                     if (await condition.IsMatchFullCondition(thread, ApiSid))
                     {
                         isMatch = true;

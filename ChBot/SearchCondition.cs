@@ -32,6 +32,7 @@ namespace ChBot
         public bool EverMatch { get; set; }
         public string Trip { get; set; }
         public int NeedMatchCount { get; set; }
+        public bool Enabled { get; set; }
 
         public BotThreadList everMatchList;
         public long lastHissiLoadTime;
@@ -61,10 +62,14 @@ namespace ChBot
             hissiThreads = new BotThreadList();
             lastHissiLoadTime = 0;
             NeedMatchCount = 1;
+            Enabled = true;
         }
 
         public bool IsMatchLiteCondition(BotThread thread)
         {
+            if (!Enabled)
+                throw new Exception("Disabled search condition.");
+
             if (SearchMode == SearchModes.Word)
             {
                 return (IsMatchTitleWord(thread)
@@ -88,6 +93,9 @@ namespace ChBot
 
         public bool IsMatchTitleWord(BotThread thread)
         {
+            if (!Enabled)
+                throw new Exception("Disabled search condition.");
+
             var isMathWord = false;
             thread.Priority = false;
             var words = Word.Split(new[] { ' ', '　' }, StringSplitOptions.RemoveEmptyEntries);
@@ -120,6 +128,9 @@ namespace ChBot
 
         public async Task<bool> IsMatchFullCondition(BotThread thread, string ApiSid)
         {
+            if (!Enabled)
+                throw new Exception("Disabled search condition.");
+
             var matched = everMatchList.Contains(thread);
             if (!matched)
             {
@@ -190,7 +201,8 @@ namespace ChBot
                 MaxNo,
                 EverMatch,
                 Trip,
-                NeedMatchCount
+                NeedMatchCount,
+                Enabled
             };
         }
 
@@ -217,6 +229,7 @@ namespace ChBot
                 EverMatch = settings.GetProperty("EverMatch").GetBoolean();
                 Trip = settings.GetProperty("Trip").GetString();
                 NeedMatchCount = settings.GetProperty("NeedMatchCount").GetInt32();
+                Enabled = settings.GetProperty("Enabled").GetBoolean();
             }
             catch { }
         }
