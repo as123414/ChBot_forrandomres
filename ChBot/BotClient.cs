@@ -123,7 +123,7 @@ namespace ChBot
         {
             if (toStop) return;
 
-            PostCount -= 0.1;
+            PostCount -= 1;
             PostCount = PostCount < 0 ? 0 : PostCount;
             RestTimeLabel.Text = PostCount.ToString();
             ui.UpdateUI(BotInstance.UIParts.Other);
@@ -153,7 +153,7 @@ namespace ChBot
 
                 if (UnixTime.Now() - startTime < 2)
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(1000 - timer1.Interval);
                 }
             }
             catch { }
