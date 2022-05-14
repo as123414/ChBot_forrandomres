@@ -33,34 +33,136 @@ namespace ChBot
         public ListModes ListMode { get; set; }
         public string ApiSid { get; set; }
         public string HomeIP { get; set; }
-        public string UserAgent { get; set; }
-        public string MonaKey { get; set; }
+        public BotUAMonaKeyPair UAMonaKeyPair { get; set; }
 
-        public List<UAMonaKeyPair> UAMonaKeyPairs { get; set; }
+        public List<BotUAMonaKeyPair> UAMonaKeyPairs { get; set; }
 
-        public BotClient client { get; set; }
+        public List<BotClient> ClientList { get; set; }
 
         public List<SearchCondition> SearchConditions { get; set; }
-
-        public bool Working { get => client.Working; }
+        public bool Working { get => ClientList.Any(client => client.Working) || SearchWorking; }
 
         public BotInstance ui;
         public BotLoginer Loginer;
         public List<BotClient> autoStartProxies;
+        public bool autoStartSearch;
+
+        public Timer searchTimer;
+        public bool SearchWorking { get; private set; } = false;
+        public bool searchTimerProceccing = false;
+        public long searchTimerProccessStartTime = 0;
+        public int SearchCount = 0;
+        public int searchAttempt = 0;
+        public List<BotThread> notifiedThreads = new List<BotThread>();
+        public bool toStop = false;
+        public Dictionary<BotThread, double> PowerList { get; set; }
 
         public BotContext(BotInstance ui)
         {
             this.ui = ui;
             ThreadContext = new BotThreadContext();
             autoStartProxies = new List<BotClient>();
+            autoStartSearch = false;
             JanePath = "";
             ListMode = ListModes.Search;
             Loginer = new BotLoginer(ui, this);
-            MonaKey = "";
-            UserAgent = "";
-            UAMonaKeyPairs = new List<UAMonaKeyPair>();
+            UAMonaKeyPair = null;
+            UAMonaKeyPairs = new List<BotUAMonaKeyPair>();
+            PowerList = new Dictionary<BotThread, double>();
+            searchTimer = new Timer() { Interval = 1000 };
+            searchTimer.Tick += SearchTimer_Tick;
             ResetSettings();
-            client = new BotClient(ui, this);
+            ClientList = new List<BotClient>() { new BotClient(ui, this, 0) };
+        }
+
+        private async void SearchTimer_Tick(object sender, EventArgs e)
+        {
+            if (toStop) return;
+
+            SearchCount--;
+            SearchCount = SearchCount < 0 ? 0 : SearchCount;
+            ui.label9.Text = SearchCount + "/" + Interval;
+
+            if (SearchCount > 0) return;
+
+            var code = 0;
+            try
+            {
+                searchTimerProceccing = true;
+                searchTimerProccessStartTime = UnixTime.Now();
+                searchTimer.Enabled = false;
+
+                await RefreshThread();
+
+                // 成功したらリセット
+                searchAttempt = 0;
+            }
+            catch (Exception er)
+            {
+                var _er = er as AggregateException == null ? er : er.InnerException;
+                WriteLog(_er.Message);
+                searchAttempt++;
+                if (searchAttempt >= 10)
+                {
+                    code = 1;
+                    try { await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
+                }
+            }
+            finally
+            {
+                searchTimerProceccing = false;
+                if (code == 1)
+                    await StopAttack();
+                searchTimer.Enabled = SearchWorking;
+                SearchCount = 10;
+                ui.label9.Text = SearchCount.ToString();
+                ui.UpdateUI();
+                ui.manager.UpdateUI();
+            }
+        }
+
+        private async Task RefreshThread()
+        {
+            await FullSearchThread(new Action<int, int>((i, cnt) =>
+            {
+                ui.label9.Text = (i + 1) + "/" + cnt;
+            }));
+            await SetPower();
+            var fixedPowerList = PowerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
+            var newThreads = fixedPowerList.Select(pair => pair.Key).Where(thread => notifiedThreads.All(t => t.Key != thread.Key)).ToList();
+            notifiedThreads.AddRange(newThreads);
+            if (notifiedThreads.Count > 100)
+            {
+                notifiedThreads = notifiedThreads.GetRange(notifiedThreads.Count - 100, 100);
+            }
+            if (newThreads.Count > 0)
+            {
+                foreach (var thread in newThreads)
+                {
+                    await Network.SendLineMessage("新規スレッドを検知 [" + notifiedThreads.Last().Title + "]");
+                }
+            }
+        }
+
+        private async Task SetPower()
+        {
+            PowerList = new Dictionary<BotThread, double>();
+            var enabledList = ThreadContext.GetEnabled().Where(thread => !ThreadContext.IsIgnoredContains(thread)).ToBotThreadList();
+            foreach (var thread in enabledList)
+            {
+                if (thread.ResListCache == null)
+                    thread.ResListCache = Network.DatToDetailResList(await Network.GetDat(thread, ApiSid));
+                var anchorResList = thread.ResListCache.Where(res => Regex.IsMatch(res["Message"], @">>\d+.*[^\d\.\-\s>]", RegexOptions.Singleline));
+                var power = anchorResList.Aggregate(0.0, (p, res) => 1.0 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
+                var ageResList = thread.ResListCache.Where(res => int.Parse(res["No"]) >= 8 && res["Mail"] != "sage");
+                power += ageResList.Aggregate(0.0, (p, res) => 0.1 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
+                PowerList.Add(thread, power);
+            }
+        }
+
+        private void WriteLog(string text)
+        {
+            ui.textBox1.AppendText(text + "\r\n");
         }
 
         //デフォルトプロファイルの復元
@@ -84,23 +186,53 @@ namespace ChBot
 
         public async Task StartAttack()
         {
-            client.Start();
+            foreach (var client in ClientList)
+                await client.Start(true);
+
+            await StartSearch();
         }
 
         public async Task StopAttack()
         {
-            await client.Stop();
+            foreach (var client in ClientList)
+                await client.Stop();
+
+            await StopSearch();
+        }
+
+        public async Task StartSearch()
+        {
+            if (SearchWorking)
+                return;
+
+            searchAttempt = 0;
+            SearchCount = 0;
+            SearchWorking = true;
+            searchTimer.Enabled = true;
+        }
+
+        public async Task StopSearch()
+        {
+            if (!SearchWorking)
+                return;
+
+            toStop = true;
+            while (searchTimerProceccing)
+                await Task.Delay(100);
+            toStop = false;
+            SearchWorking = false;
+            searchTimer.Enabled = false;
         }
 
         public async Task GatherMonaKey()
         {
-            UAMonaKeyPairs = new List<UAMonaKeyPair>();
+            UAMonaKeyPairs = new List<BotUAMonaKeyPair>();
             for (var i = 0; i < 50; i++)
             {
                 if (i % 5 == 0)
                     await Network.ChangeIP(0);
 
-                var ua = Network.GetRandomUseragent(UA.ChMate);
+                var ua = Network.GetRandomUseragent(BotUA.ChMate);
                 var mona = await Network.GetMonaKey(ua, 0);
                 /*var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
                 try
@@ -108,9 +240,47 @@ namespace ChBot
                     await Network.Post(thread, "test", "", "", ua, mona);
                 }
                 catch (PostFailureException) { }*/
-                var pair = new UAMonaKeyPair(ua, mona);
+                var pair = new BotUAMonaKeyPair(ua, mona, false);
                 UAMonaKeyPairs.Add(pair);
-                Console.WriteLine(ua + "," + mona);
+                Console.WriteLine("[" + (i + 1) + "/50] " + ua + "," + mona);
+            }
+        }
+
+        public async Task FillMonaKey()
+        {
+            UAMonaKeyPairs = UAMonaKeyPairs.Where(p => p.Used).ToList();
+            var addNum = 50 - UAMonaKeyPairs.Count;
+            var newUAMonaKeyPairs = new List<BotUAMonaKeyPair>();
+            for (var i = 0; i < addNum; i++)
+            {
+                if (i % 5 == 0)
+                    await Network.ChangeIP(0);
+
+                var ua = Network.GetRandomUseragent(BotUA.ChMate);
+                var mona = await Network.GetMonaKey(ua, 0);
+                /*var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
+                try
+                {
+                    await Network.Post(thread, "test", "", "", ua, mona);
+                }
+                catch (PostFailureException) { }*/
+                var pair = new BotUAMonaKeyPair(ua, mona, false);
+                newUAMonaKeyPairs.Insert(0, pair);
+                Console.WriteLine("[" + (i + 1) + "/" + addNum + "] " + ua + "," + mona);
+            }
+            UAMonaKeyPairs.InsertRange(0, newUAMonaKeyPairs);
+        }
+
+        public void SetUAKey()
+        {
+            if (UAMonaKeyPairs.Count == 0)
+                throw new Exception("モナキーが0個です");
+            lock (UAMonaKeyPairs)
+            {
+                var pair = UAMonaKeyPairs[0];
+                UAMonaKeyPairs.Remove(pair);
+                UAMonaKeyPairs.Add(pair);
+                UAMonaKeyPair = pair;
             }
         }
 
@@ -268,14 +438,17 @@ namespace ChBot
                 Current = ThreadContext.GetCurrent()?.getObject(),
                 History = ThreadContext.GetHistory().getObject(),
                 Working,
-                ProxyWindowState = new
+                ProxyWindowState = ClientList.Select(client => new
                 {
+                    Working = client.Working,
                     Visible = client.Visible,
                     WindowState = client.WindowState,
                     LocationX = client.Location.X,
                     LocationY = client.Location.Y,
-                },
-                UAMonaKeyPairs = UAMonaKeyPairs.Select(pair => pair.UA + "," + pair.MonaKey)
+                    deviceIndex = client.DeviceIndex
+                }),
+                UAMonaKeyPairs = UAMonaKeyPairs.Select(pair => pair.UA + "," + pair.MonaKey + "," + (pair.Used ? "1" : "0")),
+                SearchWorking
             };
         }
 
@@ -323,18 +496,6 @@ namespace ChBot
                 JanePath = state.GetProperty("JanePath").GetString();
                 HomeIP = state.GetProperty("HomeIP").GetString();
 
-                if (ui.manager.autoStart & state.GetProperty("Working").GetBoolean())
-                {
-                    autoStartProxies.Add(client);
-                }
-
-                var item = state.GetProperty("ProxyWindowState");
-                client.Visible = item.GetProperty("Visible").GetBoolean();
-                client.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), item.GetProperty("WindowState").GetString());
-                var location = new Point(item.GetProperty("LocationX").GetInt32(), item.GetProperty("LocationY").GetInt32());
-                if (location.X != -32000 && location.Y != -32000)
-                    client.Location = location;
-
                 SearchConditions = state.GetProperty("SearchConditions").EnumerateArray().Select(conditionJson =>
                 {
                     var condition = new SearchCondition();
@@ -347,8 +508,28 @@ namespace ChBot
                    var recode = recodeJson.GetString();
                    var ua = recode.Split(',')[0];
                    var mona = recode.Split(',')[1];
-                   return new UAMonaKeyPair(ua, mona);
+                   var used = recode.Split(',')[2];
+                   return new BotUAMonaKeyPair(ua, mona, used == "1");
                }).ToList();
+
+                var counter = 0;
+                foreach (var item in state.GetProperty("ProxyWindowState").EnumerateArray())
+                {
+                    var deviceIndex = item.GetProperty("deviceIndex").GetInt32();
+                    if (++counter > ClientList.Count)
+                        ClientList.Add(new BotClient(ui, this, deviceIndex));
+                    var client = ClientList[counter - 1];
+                    client.Visible = item.GetProperty("Visible").GetBoolean();
+                    client.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), item.GetProperty("WindowState").GetString());
+                    var location = new Point(item.GetProperty("LocationX").GetInt32(), item.GetProperty("LocationY").GetInt32());
+                    if (location.X != -32000 && location.Y != -32000)
+                        client.Location = location;
+                    if (ui.manager.autoStart & item.GetProperty("Working").GetBoolean())
+                        autoStartProxies.Add(client);
+                }
+
+                if (ui.manager.autoStart && state.GetProperty("SearchWorking").GetBoolean())
+                    autoStartSearch = true;
             }
             catch { }
         }

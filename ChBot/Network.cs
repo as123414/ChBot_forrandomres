@@ -20,7 +20,7 @@ using System.Drawing;
 
 namespace ChBot
 {
-    public enum UA { ChMate, X2chGear, JaneStyleWin }
+    public enum BotUA { ChMate, X2chGear, JaneStyleWin }
 
     public static class Network
     {
@@ -109,7 +109,7 @@ namespace ChBot
             var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
             try
             {
-                await Post(thread, "test", "", "", userAgent, "00000000-0000-0000-0000-000000000000", deviceIndex);
+                await Post(thread, "test", "", "", new BotUAMonaKeyPair(userAgent, "00000000-0000-0000-0000-000000000000", false), deviceIndex);
             }
             catch (SigFailureException er)
             {
@@ -185,22 +185,22 @@ namespace ChBot
             return Regex.Replace(tmp, @"%[0-9a-f]{2}", s => s.Value.ToUpper());
         }
 
-        public static UA getProfileNumber(string userAgent)
+        public static BotUA getProfileNumber(string userAgent)
         {
             if (userAgent.Contains("2chMate/"))
-                return UA.ChMate;
+                return BotUA.ChMate;
             else if (userAgent.Contains("2chGear/"))
-                return UA.X2chGear;
+                return BotUA.X2chGear;
             else if (userAgent.Contains("JaneStyle/"))
-                return UA.JaneStyleWin;
+                return BotUA.JaneStyleWin;
             else
                 throw new Exception("Unimplemented useragent.");
         }
 
         //レス投稿
-        public static async Task<string> Post(BotThread thread, string message, string name, string mail, string userAgent, string monakey, int deviceIndex)
+        public static async Task<string> Post(BotThread thread, string message, string name, string mail, BotUAMonaKeyPair uaMonaKeyPair, int deviceIndex)
         {
-            var profile = getProfileNumber(userAgent);
+            var profile = getProfileNumber(uaMonaKeyPair.UA);
             var bbs = thread.Bbs;
             var server = thread.Server;
             var key = thread.Key;
@@ -210,7 +210,7 @@ namespace ChBot
 
             switch (profile)
             {
-                case UA.ChMate:
+                case BotUA.ChMate:
                     referer = "https://" + server + "/test/read.cgi/" + bbs + "/" + time + "/";
                     pDict.Add("FROM", name);
                     pDict.Add("mail", mail);
@@ -220,7 +220,7 @@ namespace ChBot
                     pDict.Add("submit", "書き込む");
                     pDict.Add("time", time.ToString());
                     break;
-                case UA.X2chGear:
+                case BotUA.X2chGear:
                     referer = "https://" + server + "/test/read.cgi/" + bbs + "/" + time + "/";
                     pDict.Add("MESSAGE", message);
                     pDict.Add("bbs", bbs);
@@ -232,7 +232,7 @@ namespace ChBot
                     pDict.Add("time", time.ToString());
                     pDict.Add("key", key.ToString());
                     break;
-                case UA.JaneStyleWin:
+                case BotUA.JaneStyleWin:
                     referer = "https://" + server + "/test/bbs.cgi";
                     pDict.Add("submit", "書き込む");
                     pDict.Add("FROM", name);
@@ -250,7 +250,7 @@ namespace ChBot
             var data = Encoding.ASCII.GetBytes(parameters);
 
             var mona = new List<string>() { "" };
-            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, userAgent, monakey, deviceIndex, mona: mona);
+            var html = await Send(server, data, referer, bbs, key, name, mail, message, "", time, uaMonaKeyPair, deviceIndex, mona: mona);
 
             var body = Regex.Match(html, @"<body[^>]*>(.+)</body>", RegexOptions.Singleline).Value;
 
@@ -262,20 +262,21 @@ namespace ChBot
                     throw new PostFailureException(body);
             }
 
+            uaMonaKeyPair.Used = true;
             return body;
         }
 
         //スレ立て
-        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, string userAgent, string monaKey, int deviceIndex)
+        public static async Task<string> Build(string server, string bbs, string title, string message, string name, string mail, BotUAMonaKeyPair uaMonaKeyPair, int deviceIndex)
         {
-            var profile = getProfileNumber(userAgent);
+            var profile = getProfileNumber(uaMonaKeyPair.UA);
             var time = UnixTime.Now();
             var referer = "";
             var pDict = new Dictionary<string, string>();
 
             switch (profile)
             {
-                case UA.ChMate:
+                case BotUA.ChMate:
                     referer = "https://" + server + "/" + bbs + "/";
                     pDict.Add("subject", title);
                     pDict.Add("FROM", name);
@@ -285,7 +286,7 @@ namespace ChBot
                     pDict.Add("submit", "新規スレッド作成");
                     pDict.Add("time", time.ToString());
                     break;
-                case UA.X2chGear:
+                case BotUA.X2chGear:
                     referer = "https://" + server + "/test/bbs.cgi";
                     pDict.Add("MESSAGE", message);
                     pDict.Add("bbs", bbs);
@@ -296,7 +297,7 @@ namespace ChBot
                     pDict.Add("FROM", name);
                     pDict.Add("key", "");
                     break;
-                case UA.JaneStyleWin:
+                case BotUA.JaneStyleWin:
                     referer = "https://" + server + "/test/bbs.cgi";
                     pDict.Add("subject", title);
                     pDict.Add("submit", "書き込む");
@@ -313,7 +314,7 @@ namespace ChBot
             var parameters = string.Join("&", pDict.Select(p => p.Key + "=" + Encode(p.Value)));
             var data = Encoding.ASCII.GetBytes(parameters);
 
-            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, userAgent, monaKey, deviceIndex);
+            var str = await Send(server, data, referer, bbs, -1, name, mail, message, title, time, uaMonaKeyPair, deviceIndex);
 
             string html = "";
             Regex r = new Regex(@"<body[^>]*>(.+)</body>", RegexOptions.Singleline);
@@ -328,27 +329,31 @@ namespace ChBot
                 throw new PostFailureException(html);
             }
 
+            uaMonaKeyPair.Used = true;
             return html;
         }
 
         //bbs.cgiに送信
-        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, string userAgent, string monakey, int deviceIndex, List<string> mona = null)
+        private static async Task<string> Send(string server, byte[] data, string referer, string bbs, long key, string name, string mail, string message, string title, long time, BotUAMonaKeyPair uaMonaKeyPair, int deviceIndex, List<string> mona = null)
         {
+            var userAgent = uaMonaKeyPair.UA;
+            var monakey = uaMonaKeyPair.MonaKey;
+
             var profile = getProfileNumber(userAgent);
             string nonce, HMKey, AppKey;
             switch (profile)
             {
-                case UA.ChMate:
+                case BotUA.ChMate:
                     AppKey = "8yoeAcaLXiEY1FjEuJBKgkPxirkDqn";
                     HMKey = "F7vFmWCGd5Gzs8hc03NpRvw4bPwMz3";
                     nonce = time + "." + Generator.getRandomNumber(0, 9).ToString() + Generator.getRandomNumber(0, 9).ToString() + Generator.getRandomNumber(0, 9).ToString();
                     break;
-                case UA.X2chGear:
+                case BotUA.X2chGear:
                     AppKey = "hmCELmps15cHN8mL7viOH23nH24EwP";
                     HMKey = "fOOxqHdfCactc639EMjCF1mUAkG1Lx";
                     nonce = time.ToString();
                     break;
-                case UA.JaneStyleWin:
+                case BotUA.JaneStyleWin:
                     AppKey = "a6kwZ1FHfwlxIKJWCq4XQQnUTqiA1P";
                     HMKey = "ZDzsNQ7PcOOGE2mXo145X6bt39WMz6";
                     nonce = time.ToString();
@@ -380,7 +385,7 @@ namespace ChBot
             HttpWebRequest webReq;
             switch (profile)
             {
-                case UA.ChMate:
+                case BotUA.ChMate:
                     webReq = (HttpWebRequest)WebRequest.Create("https://" + server + "/test/bbs.cgi?guid=ON");
                     webReq.UserAgent = userAgent;
                     webReq.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
@@ -393,7 +398,7 @@ namespace ChBot
                     webReq.AutomaticDecompression = DecompressionMethods.GZip;
                     webReq.Referer = referer;
                     break;
-                case UA.X2chGear:
+                case BotUA.X2chGear:
                     webReq = (HttpWebRequest)WebRequest.Create("https://" + server + "/test/bbs.cgi");
                     webReq.UserAgent = userAgent;
                     webReq.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
@@ -406,7 +411,7 @@ namespace ChBot
                     webReq.AutomaticDecompression = DecompressionMethods.GZip;
                     webReq.Referer = referer;
                     break;
-                case UA.JaneStyleWin:
+                case BotUA.JaneStyleWin:
                     webReq = (HttpWebRequest)WebRequest.Create("https://" + server + "/test/bbs.cgi");
                     webReq.UserAgent = userAgent;
                     webReq.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
@@ -461,15 +466,15 @@ namespace ChBot
             }
         }
 
-        public static string GetRandomUseragent(UA profile)
+        public static string GetRandomUseragent(BotUA profile)
         {
             switch (profile)
             {
-                case UA.ChMate:
+                case BotUA.ChMate:
                     return "Monazilla/1.00 2chMate/0.8.10.153 Dalvik/2.1.0 (Linux; U; Android 12; " + Generator.makeAlphaRandom(Generator.getRandomNumber(3, 8)) + (Generator.getRandomNumber(0, 1) == 0 ? Generator.getRandomNumber(0, 100).ToString() : "") + " Build/" + Generator.getRandomNumber(0, 200) + "." + Generator.getRandomNumber(0, 200) + "." + Generator.getRandomNumber(0, 200) + ")";
-                case UA.X2chGear:
+                case BotUA.X2chGear:
                     return "Monazilla/1.00 2chGear/1.1.3 (Linux; Android 9; " + Generator.makeAlphaRandom(Generator.getRandomNumber(3, 8)) + (Generator.getRandomNumber(0, 1) == 0 ? Generator.getRandomNumber(0, 100).ToString() : "") + " Build/" + Generator.getRandomNumber(0, 200) + "." + Generator.getRandomNumber(0, 200) + "." + Generator.getRandomNumber(0, 200) + ")";
-                case UA.JaneStyleWin:
+                case BotUA.JaneStyleWin:
                     return "Monazilla/1.00 JaneStyle/4.23 Windows/10.0.22000";
                 default:
                     throw new Exception("Unimplemented useragent.");
@@ -986,15 +991,17 @@ namespace ChBot
         }
     }
 
-    public class UAMonaKeyPair
+    public class BotUAMonaKeyPair
     {
         public string UA { get; set; }
         public string MonaKey { get; set; }
+        public bool Used { get; set; }
 
-        public UAMonaKeyPair(string UA, string MonaKey)
+        public BotUAMonaKeyPair(string UA, string MonaKey, bool Used)
         {
             this.UA = UA;
             this.MonaKey = MonaKey;
+            this.Used = Used;
         }
     }
 }

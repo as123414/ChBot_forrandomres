@@ -81,8 +81,11 @@
             this.splitContainer5 = new System.Windows.Forms.SplitContainer();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.panel6 = new System.Windows.Forms.Panel();
-            this.button17 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.button19 = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button4 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button16 = new System.Windows.Forms.Button();
@@ -107,7 +110,8 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SelectDBFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button17 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.IntervalNumericUpDown)).BeginInit();
             this.ThreadLlistContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -147,7 +151,7 @@
             this.MessageTextBox.Multiline = true;
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.MessageTextBox.Size = new System.Drawing.Size(222, 236);
+            this.MessageTextBox.Size = new System.Drawing.Size(222, 240);
             this.MessageTextBox.TabIndex = 0;
             this.MessageTextBox.WordWrap = false;
             this.MessageTextBox.TextChanged += new System.EventHandler(this.MessageTextBox_TextChanged);
@@ -173,7 +177,7 @@
             this.ResultWebBrowser.Name = "ResultWebBrowser";
             this.ResultWebBrowser.ScriptErrorsSuppressed = true;
             this.ResultWebBrowser.ScrollBarsEnabled = false;
-            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 234);
+            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 238);
             this.ResultWebBrowser.TabIndex = 3;
             // 
             // IntervalNumericUpDown
@@ -206,7 +210,7 @@
             this.ThreadListListView.Margin = new System.Windows.Forms.Padding(2);
             this.ThreadListListView.Name = "ThreadListListView";
             this.ThreadListListView.ShowItemToolTips = true;
-            this.ThreadListListView.Size = new System.Drawing.Size(391, 236);
+            this.ThreadListListView.Size = new System.Drawing.Size(391, 240);
             this.ThreadListListView.TabIndex = 14;
             this.toolTip1.SetToolTip(this.ThreadListListView, "赤 - 有効\r\n黄 - 現在の書き込み対象\r\n灰 - 無視されます");
             this.ThreadListListView.UseCompatibleStateImageBehavior = false;
@@ -589,7 +593,7 @@
             // 
             this.splitContainer6.Panel2.Controls.Add(this.panel2);
             this.splitContainer6.Size = new System.Drawing.Size(855, 65);
-            this.splitContainer6.SplitterDistance = 495;
+            this.splitContainer6.SplitterDistance = 499;
             this.splitContainer6.SplitterWidth = 3;
             this.splitContainer6.TabIndex = 52;
             // 
@@ -616,7 +620,7 @@
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(2);
-            this.panel2.Size = new System.Drawing.Size(357, 65);
+            this.panel2.Size = new System.Drawing.Size(353, 65);
             this.panel2.TabIndex = 13;
             // 
             // button18
@@ -658,10 +662,14 @@
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.comboBox1);
+            this.splitContainer2.Panel2.Controls.Add(this.textBox1);
+            this.splitContainer2.Panel2.Controls.Add(this.label1);
+            this.splitContainer2.Panel2.Controls.Add(this.label9);
             this.splitContainer2.Panel2.Controls.Add(this.button17);
-            this.splitContainer2.Panel2.Controls.Add(this.button5);
+            this.splitContainer2.Panel2.Controls.Add(this.button19);
+            this.splitContainer2.Panel2.Controls.Add(this.comboBox1);
             this.splitContainer2.Panel2.Controls.Add(this.button4);
+            this.splitContainer2.Panel2.Controls.Add(this.button5);
             this.splitContainer2.Panel2.Controls.Add(this.button2);
             this.splitContainer2.Panel2.Controls.Add(this.button16);
             this.splitContainer2.Panel2.Controls.Add(this.button15);
@@ -698,7 +706,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.LoginButton);
             this.splitContainer2.Panel2.Padding = new System.Windows.Forms.Padding(2);
             this.splitContainer2.Size = new System.Drawing.Size(855, 536);
-            this.splitContainer2.SplitterDistance = 236;
+            this.splitContainer2.SplitterDistance = 240;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 15;
             // 
@@ -717,7 +725,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(855, 236);
+            this.splitContainer3.Size = new System.Drawing.Size(855, 240);
             this.splitContainer3.SplitterDistance = 222;
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
@@ -736,7 +744,7 @@
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.MessageTextBox);
-            this.splitContainer5.Size = new System.Drawing.Size(222, 236);
+            this.splitContainer5.Size = new System.Drawing.Size(222, 240);
             this.splitContainer5.SplitterDistance = 25;
             this.splitContainer5.SplitterWidth = 3;
             this.splitContainer5.TabIndex = 1;
@@ -756,7 +764,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.ThreadListListView);
-            this.splitContainer4.Size = new System.Drawing.Size(630, 236);
+            this.splitContainer4.Size = new System.Drawing.Size(630, 240);
             this.splitContainer4.SplitterDistance = 236;
             this.splitContainer4.SplitterWidth = 3;
             this.splitContainer4.TabIndex = 0;
@@ -769,40 +777,61 @@
             this.panel6.Location = new System.Drawing.Point(0, 0);
             this.panel6.Margin = new System.Windows.Forms.Padding(2);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(236, 236);
+            this.panel6.Size = new System.Drawing.Size(236, 240);
             this.panel6.TabIndex = 4;
             // 
-            // button17
+            // textBox1
             // 
-            this.button17.AutoSize = true;
-            this.button17.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button17.Location = new System.Drawing.Point(479, 22);
-            this.button17.Margin = new System.Windows.Forms.Padding(2);
-            this.button17.Name = "button17";
-            this.button17.Size = new System.Drawing.Size(74, 25);
-            this.button17.TabIndex = 121;
-            this.button17.Text = "Get Mona3";
-            this.button17.UseVisualStyleBackColor = true;
-            this.button17.Click += new System.EventHandler(this.button17_Click);
+            this.textBox1.Location = new System.Drawing.Point(3, 7);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(199, 71);
+            this.textBox1.TabIndex = 125;
+            this.textBox1.WordWrap = false;
             // 
-            // button5
+            // label1
             // 
-            this.button5.AutoSize = true;
-            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button5.Location = new System.Drawing.Point(479, 51);
-            this.button5.Margin = new System.Windows.Forms.Padding(2);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(74, 25);
-            this.button5.TabIndex = 120;
-            this.button5.Text = "Get Mona2";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(20, 107);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(0, 12);
+            this.label1.TabIndex = 124;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(20, 84);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(0, 12);
+            this.label9.TabIndex = 124;
+            // 
+            // button19
+            // 
+            this.button19.Location = new System.Drawing.Point(278, 135);
+            this.button19.Name = "button19";
+            this.button19.Size = new System.Drawing.Size(75, 23);
+            this.button19.TabIndex = 123;
+            this.button19.Text = "ADD";
+            this.button19.UseVisualStyleBackColor = true;
+            this.button19.Click += new System.EventHandler(this.button19_Click);
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Direct"});
+            this.comboBox1.Location = new System.Drawing.Point(340, 99);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 20);
+            this.comboBox1.TabIndex = 122;
             // 
             // button4
             // 
             this.button4.AutoSize = true;
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button4.Location = new System.Drawing.Point(478, 80);
+            this.button4.Location = new System.Drawing.Point(478, 62);
             this.button4.Margin = new System.Windows.Forms.Padding(2);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(79, 25);
@@ -940,11 +969,11 @@
             // OpenSearchConditionsButton
             // 
             this.OpenSearchConditionsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.OpenSearchConditionsButton.Location = new System.Drawing.Point(134, 16);
+            this.OpenSearchConditionsButton.Location = new System.Drawing.Point(210, 16);
             this.OpenSearchConditionsButton.Name = "OpenSearchConditionsButton";
-            this.OpenSearchConditionsButton.Size = new System.Drawing.Size(178, 60);
+            this.OpenSearchConditionsButton.Size = new System.Drawing.Size(102, 60);
             this.OpenSearchConditionsButton.TabIndex = 105;
-            this.OpenSearchConditionsButton.Text = "検索条件設定画面を開く";
+            this.OpenSearchConditionsButton.Text = "検索条件設定";
             this.OpenSearchConditionsButton.UseVisualStyleBackColor = true;
             this.OpenSearchConditionsButton.Click += new System.EventHandler(this.OpenSearchConditionsButton_Click);
             // 
@@ -1063,16 +1092,28 @@
             this.timer1.Interval = 43200000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // comboBox1
+            // button5
             // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Direct"});
-            this.comboBox1.Location = new System.Drawing.Point(340, 99);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 20);
-            this.comboBox1.TabIndex = 122;
+            this.button5.AutoSize = true;
+            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button5.Location = new System.Drawing.Point(705, 93);
+            this.button5.Margin = new System.Windows.Forms.Padding(2);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(82, 25);
+            this.button5.TabIndex = 118;
+            this.button5.Text = "Fill Mona";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button17
+            // 
+            this.button17.Location = new System.Drawing.Point(278, 164);
+            this.button17.Name = "button17";
+            this.button17.Size = new System.Drawing.Size(75, 23);
+            this.button17.TabIndex = 123;
+            this.button17.Text = "DEL";
+            this.button17.UseVisualStyleBackColor = true;
+            this.button17.Click += new System.EventHandler(this.button17_Click);
             // 
             // BotInstance
             // 
@@ -1198,10 +1239,14 @@
         private System.Windows.Forms.Button button15;
         private System.Windows.Forms.Button button16;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button17;
         private System.Windows.Forms.Button button18;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button button19;
+        private System.Windows.Forms.Label label1;
+        public System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button17;
     }
 }

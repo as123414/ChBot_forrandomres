@@ -56,13 +56,49 @@ namespace ChBot
         //プロキシ一覧を表示
         private void ListUpProxy()
         {
-            listView1.Items.Clear();
-            var client = context.client;
-            ListViewItem item = new ListViewItem(new[] { "(Direct)", client.PostCount.ToString(), client.Attempt.ToString() + "/10" });
-            item.BackColor = client.Working ? Color.Red : Color.White;
-            item.ForeColor = client.Working ? Color.White : Color.Black;
-            item.Tag = client;
-            listView1.Items.AddRange(new[] { item });
+            var refresh = false;
+            var shownClinetList = new List<BotClient>();
+            foreach (ListViewItem item in listView1.Items)
+                shownClinetList.Add((BotClient)item.Tag);
+            if (shownClinetList.Count != context.ClientList.Count)
+            {
+                refresh = true;
+            }
+            else
+            {
+                for (var i = 0; i < shownClinetList.Count; i++)
+                {
+                    if (shownClinetList[i] != context.ClientList[i])
+                    {
+                        refresh = true;
+                        break;
+                    }
+                }
+            }
+            if (refresh)
+            {
+                listView1.Items.Clear();
+                foreach (var client in context.ClientList)
+                {
+                    ListViewItem item = new ListViewItem(new[] { Network.DeviceIDList[client.DeviceIndex], client.PostCount.ToString(), client.Attempt.ToString() + "/10" });
+                    item.BackColor = client.Working ? Color.Red : Color.White;
+                    item.ForeColor = client.Working ? Color.White : Color.Black;
+                    item.Tag = client;
+                    listView1.Items.AddRange(new[] { item });
+                }
+            }
+            else
+            {
+                foreach (ListViewItem item in listView1.Items)
+                {
+                    var client = (BotClient)item.Tag;
+                    item.BackColor = client.Working ? Color.Red : Color.White;
+                    item.ForeColor = client.Working ? Color.White : Color.Black;
+                    item.SubItems[0].Text = Network.DeviceIDList[client.DeviceIndex];
+                    item.SubItems[1].Text = client.PostCount.ToString();
+                    item.SubItems[2].Text = client.Attempt.ToString() + "/10";
+                }
+            }
         }
 
         //開始停止ボタン
@@ -394,8 +430,8 @@ namespace ChBot
                 StartStopButton.ForeColor = SystemColors.ControlText;
             }
 
-            var client = context.client;
-            client.Text = InstanceName + ": " + "(Direct)";
+            foreach (var client in context.ClientList)
+                client.Text = InstanceName + ": " + Network.DeviceIDList[client.DeviceIndex];
 
             context.Loginer.Text = InstanceName + ": " + "ログイン";
 
@@ -417,7 +453,8 @@ namespace ChBot
             {
                 e.Cancel = true;
                 Hide();
-                context.client.Hide();
+                foreach (var client in context.ClientList)
+                    client.Hide();
                 context.Loginer.Hide();
             }
         }
@@ -600,7 +637,7 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1);
+                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -735,7 +772,7 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, context.Message, context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1);
+                await Network.Post(target, context.Message, context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -772,7 +809,7 @@ namespace ChBot
                 var tasks = new List<Task>();
                 for (var i = 0; i < 3; i++)
                 {
-                    tasks.Add(Network.Post(target, Generator.makeKanjiRandom(), context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1));
+                    tasks.Add(Network.Post(target, Generator.makeKanjiRandom(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1));
                 }
                 await Task.WhenAll(tasks);
             }
@@ -834,9 +871,10 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                context.UserAgent = Network.GetRandomUseragent(UA.ChMate);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent, comboBox1.SelectedIndex - 1);
-                MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
+                var UA = Network.GetRandomUseragent(BotUA.ChMate);
+                var Mona = await Network.GetMonaKey(UA, comboBox1.SelectedIndex - 1);
+                context.UAMonaKeyPair = new BotUAMonaKeyPair(UA, Mona, false);
+                MessageBox.Show(UA + "\n" + Mona);
             }
             catch (Exception er)
             {
@@ -855,6 +893,7 @@ namespace ChBot
             try
             {
                 await context.GatherMonaKey();
+                MessageBox.Show(context.UAMonaKeyPairs.Count + "個取得");
             }
             catch (Exception er)
             {
@@ -864,27 +903,6 @@ namespace ChBot
             button2.Enabled = true;
         }
 
-        private async void button5_Click(object sender, EventArgs e)
-        {
-            button5.Enabled = false;
-
-            try
-            {
-                var target = context.ThreadContext.GetCurrent();
-                context.UserAgent = Network.GetRandomUseragent(UA.X2chGear);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent, comboBox1.SelectedIndex - 1);
-                MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
-            }
-            catch (Exception er)
-            {
-                MessageBox.Show(er.Message);
-                if (er as PostFailureException != null)
-                    MessageBox.Show(((PostFailureException)er).Result);
-            }
-
-            button5.Enabled = true;
-        }
-
         private async void button4_Click(object sender, EventArgs e)
         {
             button4.Enabled = false;
@@ -892,7 +910,7 @@ namespace ChBot
             try
             {
                 var target = context.ThreadContext.GetCurrent();
-                await Network.Build("mi.5ch.net", "news4vip", UnixTime.Now().ToString(), UnixTime.Now().ToString(), context.Name, context.Mail, context.UserAgent, context.MonaKey, comboBox1.SelectedIndex - 1);
+                await Network.Build("mi.5ch.net", "news4vip", UnixTime.Now().ToString(), UnixTime.Now().ToString(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -904,31 +922,64 @@ namespace ChBot
             button4.Enabled = true;
         }
 
-        private async void button17_Click(object sender, EventArgs e)
-        {
-            button17.Enabled = false;
-
-            try
-            {
-                var target = context.ThreadContext.GetCurrent();
-                context.UserAgent = Network.GetRandomUseragent(UA.JaneStyleWin);
-                context.MonaKey = await Network.GetMonaKey(context.UserAgent, comboBox1.SelectedIndex - 1);
-                MessageBox.Show(context.UserAgent + "\n" + context.MonaKey);
-            }
-            catch (Exception er)
-            {
-                MessageBox.Show(er.Message);
-                if (er as PostFailureException != null)
-                    MessageBox.Show(((PostFailureException)er).Result);
-            }
-
-            button17.Enabled = true;
-        }
-
         private void button18_Click(object sender, EventArgs e)
         {
             context.LoadSettings();
             MessageBox.Show("ロードしました。");
+            UpdateUI(UIParts.Other);
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            var exist = context.ClientList.Any(client => client.DeviceIndex == comboBox1.SelectedIndex - 1);
+            if (!exist)
+            {
+                context.ClientList.Add(new BotClient(this, context, comboBox1.SelectedIndex - 1));
+                UpdateUI(UIParts.Other);
+            }
+            else
+            {
+                MessageBox.Show("既に存在します。");
+            }
+        }
+
+        private async void button5_Click(object sender, EventArgs e)
+        {
+            button5.Enabled = false;
+
+            try
+            {
+                await context.FillMonaKey();
+                MessageBox.Show("計" + context.UAMonaKeyPairs.Count + "個");
+            }
+            catch (Exception er)
+            {
+                MessageBox.Show(er.Message);
+            }
+
+            button5.Enabled = true;
+        }
+
+        private async void button17_Click(object sender, EventArgs e)
+        {
+            var selected = listView1.SelectedItems;
+            if (selected.Count == 1)
+            {
+                var delProxies = new List<BotClient>();
+                foreach (var client in context.ClientList)
+                {
+                    if (((BotClient)selected[0].Tag) != client)
+                    {
+                        delProxies.Add(client);
+                    }
+                    else
+                    {
+                        await client.Stop();
+                        client.Close();
+                    }
+                }
+                context.ClientList = delProxies;
+            }
             UpdateUI(UIParts.Other);
         }
     }

@@ -96,7 +96,7 @@ namespace ChBot
 
             foreach (var proxy in context.autoStartProxies)
             {
-                proxy.Start();
+                await proxy.Start(false);
             }
 
             context.autoStartProxies.Clear();

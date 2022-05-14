@@ -23,18 +23,11 @@ namespace ChBot
         public BotContext context;
         public bool timer1Proceccing = false;
         public long timer1ProccessStartTime = 0;
-        public bool timer2Proceccing = false;
-        public long timer2ProccessStartTime = 0;
-        public int SearchCount;
-        public int searchAttempt = 0;
-        public Dictionary<BotThread, double> powerList = new Dictionary<BotThread, double>();
-        public List<BotThread> notifiedThreads = new List<BotThread>();
         public bool hasLastChance = true;
-        public bool hasLastChance2 = true;
-        public Exception lastRefreshException = null;
         public bool toStop = false;
+        public int DeviceIndex { get; private set; }
 
-        public BotClient(BotInstance ui, BotContext context)
+        public BotClient(BotInstance ui, BotContext context, int deviceIndex)
         {
             InitializeComponent();
 
@@ -44,32 +37,30 @@ namespace ChBot
 
             Attempt = 0;
             PostCount = context.Interval;
-            SearchCount = 0;
             Working = false;
             this.ui = ui;
             this.context = context;
             label6.Text = Attempt.ToString() + "/10";
             RestTimeLabel.Text = PostCount.ToString();
-            label9.Text = SearchCount.ToString();
+            DeviceIndex = deviceIndex;
         }
 
-        public void Start()
+        public async Task Start(bool disableStartSearch)
         {
             if (Working)
                 return;
 
             Attempt = 0;
-            searchAttempt = 0;
             hasLastChance = true;
-            hasLastChance2 = true;
             PostCount = context.Interval;
             Working = true;
             timer1.Enabled = true;
-            SearchCount = 0;
-            timer2.Enabled = true;
             button1.Text = "停止";
             button1.BackColor = Color.Red;
             button1.ForeColor = Color.White;
+
+            if (!disableStartSearch && !context.SearchWorking)
+                await context.StartSearch();
         }
 
         public async Task Stop()
@@ -78,12 +69,11 @@ namespace ChBot
                 return;
 
             toStop = true;
-            while (timer1Proceccing || timer2Proceccing)
+            while (timer1Proceccing)
                 await Task.Delay(100);
             toStop = false;
 
             timer1.Enabled = false;
-            timer2.Enabled = false;
             Working = false;
             button1.Text = "開始";
             button1.BackColor = SystemColors.Control;
@@ -112,7 +102,7 @@ namespace ChBot
             }
             else
             {
-                Start();
+                await Start(false);
             }
 
             ui.UpdateUI();
@@ -160,112 +150,13 @@ namespace ChBot
             finally
             {
                 timer1Proceccing = false;
-                if (code == 0)
-                {
-                    timer1.Enabled = Working;
-                }
-                else
+                if (code == 1)
                 {
                     await Stop();
                     ui.UpdateUI(BotInstance.UIParts.Other);
                     ui.manager.UpdateUI();
                 }
-            }
-        }
-
-        private async void timer2_Tick(object sender, EventArgs e)
-        {
-            if (toStop) return;
-
-            SearchCount--;
-            SearchCount = SearchCount < 0 ? 0 : SearchCount;
-            label9.Text = SearchCount.ToString();
-
-            if (SearchCount > 0) return;
-
-            var code = 0;
-            try
-            {
-                timer2Proceccing = true;
-                timer2ProccessStartTime = UnixTime.Now();
-                timer2.Enabled = false;
-
-                await RefreshThread();
-
-                // 成功したらリセット
-                searchAttempt = 0;
-            }
-            catch (Exception er)
-            {
-                var _er = er as AggregateException == null ? er : er.InnerException;
-                WriteLog(_er.Message);
-                searchAttempt++;
-                if (searchAttempt >= 10)
-                {
-                    code = 1;
-                    try { await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
-                }
-            }
-            finally
-            {
-                timer2Proceccing = false;
-                if (code == 0)
-                    timer2.Enabled = Working;
-                else
-                    await Stop();
-                SearchCount = 10;
-                label9.Text = SearchCount.ToString();
-                ui.UpdateUI();
-                ui.manager.UpdateUI();
-            }
-        }
-
-        private async Task RefreshThread()
-        {
-            await context.FullSearchThread(new Action<int, int>((i, cnt) =>
-            {
-                if (InvokeRequired)
-                {
-                    Invoke(new Action(() =>
-                    {
-                        label9.Text = (i + 1) + "/" + cnt;
-                    }));
-                }
-                else
-                {
-                    label9.Text = (i + 1) + "/" + cnt;
-                }
-            }));
-            await SetPower();
-            var fixedPowerList = powerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
-            var newThreads = fixedPowerList.Select(pair => pair.Key).Where(thread => notifiedThreads.All(t => t.Key != thread.Key)).ToList();
-            notifiedThreads.AddRange(newThreads);
-            if (notifiedThreads.Count > 100)
-            {
-                notifiedThreads = notifiedThreads.GetRange(notifiedThreads.Count - 100, 100);
-            }
-            if (newThreads.Count > 0)
-            {
-                foreach (var thread in newThreads)
-                {
-                    await Network.SendLineMessage("新規スレッドを検知 [" + notifiedThreads.Last().Title + "]");
-                }
-            }
-        }
-
-        private async Task SetPower()
-        {
-            powerList = new Dictionary<BotThread, double>();
-            var enabledList = context.ThreadContext.GetEnabled().Where(thread => !context.ThreadContext.IsIgnoredContains(thread)).ToBotThreadList();
-            foreach (var thread in enabledList)
-            {
-                if (thread.ResListCache == null)
-                    thread.ResListCache = Network.DatToDetailResList(await Network.GetDat(thread, context.ApiSid));
-                var anchorResList = thread.ResListCache.Where(res => Regex.IsMatch(res["Message"], @">>\d+.*[^\d\.\-\s>]", RegexOptions.Singleline));
-                var power = anchorResList.Aggregate(0.0, (p, res) => 1.0 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
-                var ageResList = thread.ResListCache.Where(res => int.Parse(res["No"]) >= 8 && res["Mail"] != "sage");
-                power += ageResList.Aggregate(0.0, (p, res) => 0.1 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
-                powerList.Add(thread, power);
+                timer1.Enabled = Working;
             }
         }
 
@@ -288,7 +179,7 @@ namespace ChBot
                 }
 
                 ReportProgress("CHANGE_IP_STARTED");
-                await Network.ChangeIP(0);
+                await Network.ChangeIP(DeviceIndex);
                 ReportProgress("CHANGE_IP_COMPLETED");
 
                 if (context.HomeIP.Split('.').Length == 4)
@@ -312,11 +203,11 @@ namespace ChBot
 
                     ReportProgress("POST" + (i + 1) + "_STARTED");
                     AddHistory(current);
-                    SetUAKey();
+                    context.SetUAKey();
 
                     try
                     {
-                        var result = await Network.Post(current, context.Message, context.Name, context.Mail, context.UserAgent, context.MonaKey, 0);
+                        var result = await Network.Post(current, context.Message, context.Name, context.Mail, context.UAMonaKeyPair, DeviceIndex);
                         WriteResult(result);
                     }
                     catch (Exception er)
@@ -362,7 +253,7 @@ namespace ChBot
                         hasLastChance = false;
                         try { await Network.SendLineMessage("エラーのためコマンドを試行します"); } catch { }
                         ReportProgress("RESTART_USB_STARTED");
-                        try { await Network.RestartUsb(0); } catch { }
+                        try { await Network.RestartUsb(DeviceIndex); } catch { }
                         ReportProgress("RESTART_USB_COMPLETED");
                         return 0;
                     }
@@ -393,15 +284,6 @@ namespace ChBot
             }
         }
 
-        private void SetUAKey()
-        {
-            var pair = context.UAMonaKeyPairs[0];
-            context.UAMonaKeyPairs.Remove(pair);
-            context.UAMonaKeyPairs.Add(pair);
-            context.UserAgent = pair.UA;
-            context.MonaKey = pair.MonaKey;
-        }
-
         private void AddHistory(BotThread current)
         {
             current.Wrote = UnixTime.Now();
@@ -411,7 +293,7 @@ namespace ChBot
 
         private BotThread SetNextCurrent()
         {
-            var fixedPowerList = powerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
+            var fixedPowerList = context.PowerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
             if (fixedPowerList.Count > 0)
             {
                 var powerSum = fixedPowerList.Aggregate(0.0, (sum, pair) => pair.Value + sum);
@@ -440,7 +322,7 @@ namespace ChBot
 
         private async Task CheckIP()
         {
-            var ip = await Network.GetIPAddress(0);
+            var ip = await Network.GetIPAddress(DeviceIndex);
 
             if (
                    (ip.Split('.')[0] == context.HomeIP.Split('.')[0] || context.HomeIP.Split('.')[0] == "*")

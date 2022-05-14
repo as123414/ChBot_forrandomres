@@ -98,7 +98,8 @@ namespace ChBot
                         if (visible)
                         {
                             newInstance.Show();
-                            newInstance.context.client.Show();
+                            foreach (var client in newInstance.context.ClientList)
+                                client.Show();
                         }
                         newInstance.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), instanceData.GetProperty("WindowState").GetString());
                         newInstance.UpdateUI();
@@ -247,14 +248,15 @@ namespace ChBot
 
             var cond2 = instanceList.Any(instance =>
             {
-                var client = instance.context.client;
-                return client.timer1Proceccing && UnixTime.Now() - client.timer1ProccessStartTime > 30;
+                return instance.context.ClientList.Any(client =>
+                {
+                    return client.timer1Proceccing && UnixTime.Now() - client.timer1ProccessStartTime > 30;
+                });
             });
 
             var cond3 = instanceList.Any(instance =>
             {
-                var client = instance.context.client;
-                return instance.context.client.timer2Proceccing && UnixTime.Now() - instance.context.client.timer2ProccessStartTime > 180;
+                return instance.context.searchTimerProceccing && UnixTime.Now() - instance.context.searchTimerProccessStartTime > 180;
             });
 
             if (cond1 || cond2 || cond3)
