@@ -296,19 +296,10 @@ namespace ChBot
             var allThreads = await Network.GetThreadList(Board);
             var searchResult = allThreads.Where(thread => SearchConditions.Where(condition => condition.Enabled).Any(condition => condition.IsMatchLiteCondition(thread))).ToBotThreadList();
             searchResult.Sort();
-            var current = ThreadContext.GetCurrent();
             ThreadContext.ClearEnabled();
             ThreadContext.AddEnabled(searchResult);
             ThreadContext.SearchResult = searchResult;
             ThreadContext.DeleteUnneccesaryIgnored();
-            if (current != null)
-            {
-                ThreadContext.SetCurrent(current);
-            }
-            else
-            {
-                ThreadContext.SetCurrent(ThreadContext.EnabledAt(0), true);
-            }
         }
 
         public async Task FullSearchThread(Action<int, int> report = null)
@@ -339,19 +330,10 @@ namespace ChBot
                 }
             }
             searchResult.Sort();
-            var current = ThreadContext.GetCurrent();
             ThreadContext.ClearEnabled();
             ThreadContext.AddEnabled(searchResult);
             ThreadContext.SearchResult = searchResult;
             ThreadContext.DeleteUnneccesaryIgnored();
-            if (current != null)
-            {
-                ThreadContext.SetCurrent(current);
-            }
-            else
-            {
-                ThreadContext.SetCurrent(ThreadContext.EnabledAt(0), true);
-            }
         }
 
         //プロファイル保存
@@ -435,7 +417,6 @@ namespace ChBot
                 SearchResult = ThreadContext.SearchResult.Clone().getObject(),
                 Enabled = ThreadContext.GetEnabled().getObject(),
                 Ignored = ThreadContext.GetIgnored().getObject(),
-                Current = ThreadContext.GetCurrent()?.getObject(),
                 History = ThreadContext.GetHistory().getObject(),
                 Working,
                 ProxyWindowState = ClientList.Select(client => new
@@ -485,13 +466,6 @@ namespace ChBot
                 var history = new BotThreadList();
                 history.ResumeObject(state.GetProperty("History"));
                 ThreadContext.AddHistory(history);
-
-                var current = new BotThread(0, "", "", "");
-                if (state.GetProperty("Current").ValueKind == JsonValueKind.Null)
-                    current = null;
-                else
-                    current.ResumeObject(state.GetProperty("Current"));
-                ThreadContext.SetCurrent(current);
 
                 JanePath = state.GetProperty("JanePath").GetString();
                 HomeIP = state.GetProperty("HomeIP").GetString();

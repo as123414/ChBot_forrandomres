@@ -40,7 +40,6 @@
             this.ThreadLlistContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -84,14 +83,15 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
+            this.button17 = new System.Windows.Forms.Button();
             this.button19 = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button16 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
-            this.button13 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -110,8 +110,6 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SelectDBFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button17 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.IntervalNumericUpDown)).BeginInit();
             this.ThreadLlistContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -151,7 +149,7 @@
             this.MessageTextBox.Multiline = true;
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.MessageTextBox.Size = new System.Drawing.Size(222, 240);
+            this.MessageTextBox.Size = new System.Drawing.Size(222, 241);
             this.MessageTextBox.TabIndex = 0;
             this.MessageTextBox.WordWrap = false;
             this.MessageTextBox.TextChanged += new System.EventHandler(this.MessageTextBox_TextChanged);
@@ -177,7 +175,7 @@
             this.ResultWebBrowser.Name = "ResultWebBrowser";
             this.ResultWebBrowser.ScriptErrorsSuppressed = true;
             this.ResultWebBrowser.ScrollBarsEnabled = false;
-            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 238);
+            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 239);
             this.ResultWebBrowser.TabIndex = 3;
             // 
             // IntervalNumericUpDown
@@ -210,12 +208,11 @@
             this.ThreadListListView.Margin = new System.Windows.Forms.Padding(2);
             this.ThreadListListView.Name = "ThreadListListView";
             this.ThreadListListView.ShowItemToolTips = true;
-            this.ThreadListListView.Size = new System.Drawing.Size(391, 240);
+            this.ThreadListListView.Size = new System.Drawing.Size(391, 241);
             this.ThreadListListView.TabIndex = 14;
             this.toolTip1.SetToolTip(this.ThreadListListView, "赤 - 有効\r\n黄 - 現在の書き込み対象\r\n灰 - 無視されます");
             this.ThreadListListView.UseCompatibleStateImageBehavior = false;
             this.ThreadListListView.View = System.Windows.Forms.View.Details;
-            this.ThreadListListView.DoubleClick += new System.EventHandler(this.ThreadListListView_DoubleClick);
             this.ThreadListListView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ThreadListListView_KeyUp);
             // 
             // columnHeader3
@@ -239,7 +236,6 @@
             this.ThreadLlistContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem5,
             this.toolStripMenuItem6,
-            this.toolStripMenuItem7,
             this.toolStripMenuItem1,
             this.toolStripMenuItem4,
             this.toolStripMenuItem2,
@@ -247,7 +243,7 @@
             this.toolStripMenuItem3,
             this.toolStripMenuItem9});
             this.ThreadLlistContextMenuStrip.Name = "contextMenuStrip1";
-            this.ThreadLlistContextMenuStrip.Size = new System.Drawing.Size(260, 202);
+            this.ThreadLlistContextMenuStrip.Size = new System.Drawing.Size(179, 180);
             // 
             // toolStripMenuItem5
             // 
@@ -266,16 +262,6 @@
             this.toolStripMenuItem6.Size = new System.Drawing.Size(259, 22);
             this.toolStripMenuItem6.Text = "有効解除(&U)";
             this.toolStripMenuItem6.Click += new System.EventHandler(this.toolStripMenuItem6_Click);
-            // 
-            // toolStripMenuItem7
-            // 
-            this.toolStripMenuItem7.BackColor = System.Drawing.SystemColors.Control;
-            this.toolStripMenuItem7.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.ShortcutKeyDisplayString = "ダブルクリック";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(259, 22);
-            this.toolStripMenuItem7.Text = "カレントスレッドに設定(&S)";
-            this.toolStripMenuItem7.Click += new System.EventHandler(this.toolStripMenuItem7_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -593,7 +579,7 @@
             // 
             this.splitContainer6.Panel2.Controls.Add(this.panel2);
             this.splitContainer6.Size = new System.Drawing.Size(855, 65);
-            this.splitContainer6.SplitterDistance = 499;
+            this.splitContainer6.SplitterDistance = 500;
             this.splitContainer6.SplitterWidth = 3;
             this.splitContainer6.TabIndex = 52;
             // 
@@ -620,7 +606,7 @@
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(2);
-            this.panel2.Size = new System.Drawing.Size(353, 65);
+            this.panel2.Size = new System.Drawing.Size(352, 65);
             this.panel2.TabIndex = 13;
             // 
             // button18
@@ -674,7 +660,6 @@
             this.splitContainer2.Panel2.Controls.Add(this.button16);
             this.splitContainer2.Panel2.Controls.Add(this.button15);
             this.splitContainer2.Panel2.Controls.Add(this.button14);
-            this.splitContainer2.Panel2.Controls.Add(this.button13);
             this.splitContainer2.Panel2.Controls.Add(this.button12);
             this.splitContainer2.Panel2.Controls.Add(this.button3);
             this.splitContainer2.Panel2.Controls.Add(this.button1);
@@ -706,7 +691,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.LoginButton);
             this.splitContainer2.Panel2.Padding = new System.Windows.Forms.Padding(2);
             this.splitContainer2.Size = new System.Drawing.Size(855, 536);
-            this.splitContainer2.SplitterDistance = 240;
+            this.splitContainer2.SplitterDistance = 241;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 15;
             // 
@@ -725,7 +710,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(855, 240);
+            this.splitContainer3.Size = new System.Drawing.Size(855, 241);
             this.splitContainer3.SplitterDistance = 222;
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
@@ -744,7 +729,7 @@
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.MessageTextBox);
-            this.splitContainer5.Size = new System.Drawing.Size(222, 240);
+            this.splitContainer5.Size = new System.Drawing.Size(222, 241);
             this.splitContainer5.SplitterDistance = 25;
             this.splitContainer5.SplitterWidth = 3;
             this.splitContainer5.TabIndex = 1;
@@ -764,7 +749,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.ThreadListListView);
-            this.splitContainer4.Size = new System.Drawing.Size(630, 240);
+            this.splitContainer4.Size = new System.Drawing.Size(630, 241);
             this.splitContainer4.SplitterDistance = 236;
             this.splitContainer4.SplitterWidth = 3;
             this.splitContainer4.TabIndex = 0;
@@ -777,7 +762,7 @@
             this.panel6.Location = new System.Drawing.Point(0, 0);
             this.panel6.Margin = new System.Windows.Forms.Padding(2);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(236, 240);
+            this.panel6.Size = new System.Drawing.Size(236, 241);
             this.panel6.TabIndex = 4;
             // 
             // textBox1
@@ -805,6 +790,16 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(0, 12);
             this.label9.TabIndex = 124;
+            // 
+            // button17
+            // 
+            this.button17.Location = new System.Drawing.Point(278, 164);
+            this.button17.Name = "button17";
+            this.button17.Size = new System.Drawing.Size(75, 23);
+            this.button17.TabIndex = 123;
+            this.button17.Text = "DEL";
+            this.button17.UseVisualStyleBackColor = true;
+            this.button17.Click += new System.EventHandler(this.button17_Click);
             // 
             // button19
             // 
@@ -839,6 +834,19 @@
             this.button4.Text = "Build";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button5
+            // 
+            this.button5.AutoSize = true;
+            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button5.Location = new System.Drawing.Point(705, 93);
+            this.button5.Margin = new System.Windows.Forms.Padding(2);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(82, 25);
+            this.button5.TabIndex = 118;
+            this.button5.Text = "Fill Mona";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button2
             // 
@@ -891,17 +899,6 @@
             this.button14.Text = "Get Line";
             this.button14.UseVisualStyleBackColor = true;
             this.button14.Click += new System.EventHandler(this.button14_Click);
-            // 
-            // button13
-            // 
-            this.button13.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button13.Location = new System.Drawing.Point(775, 63);
-            this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(75, 25);
-            this.button13.TabIndex = 115;
-            this.button13.Text = "Post3";
-            this.button13.UseVisualStyleBackColor = true;
-            this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
             // button12
             // 
@@ -1092,29 +1089,6 @@
             this.timer1.Interval = 43200000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // button5
-            // 
-            this.button5.AutoSize = true;
-            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button5.Location = new System.Drawing.Point(705, 93);
-            this.button5.Margin = new System.Windows.Forms.Padding(2);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(82, 25);
-            this.button5.TabIndex = 118;
-            this.button5.Text = "Fill Mona";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // button17
-            // 
-            this.button17.Location = new System.Drawing.Point(278, 164);
-            this.button17.Name = "button17";
-            this.button17.Size = new System.Drawing.Size(75, 23);
-            this.button17.TabIndex = 123;
-            this.button17.Text = "DEL";
-            this.button17.UseVisualStyleBackColor = true;
-            this.button17.Click += new System.EventHandler(this.button17_Click);
-            // 
             // BotInstance
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1189,7 +1163,6 @@
         public System.Windows.Forms.Label label13;
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
-        public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem7;
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem8;
         public System.Windows.Forms.ColumnHeader columnHeader3;
         public System.Windows.Forms.Label label14;
@@ -1234,7 +1207,6 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button12;
-        private System.Windows.Forms.Button button13;
         private System.Windows.Forms.Button button14;
         private System.Windows.Forms.Button button15;
         private System.Windows.Forms.Button button16;

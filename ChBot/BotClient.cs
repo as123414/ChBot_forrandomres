@@ -26,6 +26,7 @@ namespace ChBot
         public bool hasLastChance = true;
         public bool toStop = false;
         public int DeviceIndex { get; private set; }
+        public BotThread current = null;
 
         public BotClient(BotInstance ui, BotContext context, int deviceIndex)
         {
@@ -171,7 +172,7 @@ namespace ChBot
             {
                 ReportProgress("MAIN_STARTED");
 
-                var current = SetNextCurrent();
+                current = SetNextCurrent();
                 if (current == null || context.ThreadContext.IsIgnored(current))
                 {
                     WriteResult("");
@@ -219,11 +220,12 @@ namespace ChBot
                         WriteResult(__er.Result);
                         if (__er.Result.IndexOf("このスレッドには") == -1 && __er.Result.IndexOf("該当する") == -1)
                             throw;
-                        context.ThreadContext.AddIgnored(current, true);
+                        context.ThreadContext.AddIgnored(current);
                     }
                 }
 
                 // 書き込み成功時の処理
+                current = null;
                 Attempt = 0;
                 ReportProgress("POST_COMPLETED");
                 if (hasLastChance == false)
@@ -240,8 +242,9 @@ namespace ChBot
             catch (Exception er)
             {
                 // 書き込み失敗時の処理
+                current = null;
                 var _er = er as AggregateException == null ? er : er.InnerException;
-                WriteLog(_er.Message + " " + _er.StackTrace);
+                WriteLog(_er.Message);
                 Attempt++;
                 ReportProgress("MAIN_FAILED");
                 if (Attempt >= 10)
@@ -293,7 +296,11 @@ namespace ChBot
 
         private BotThread SetNextCurrent()
         {
-            var fixedPowerList = context.PowerList.Where(pair => pair.Value > 0.05).ToDictionary(pair => pair.Key, pair => pair.Value);
+            var fixedPowerList = context.PowerList
+                .Where(pair => context.ClientList.All(client => client.current == null || !client.current.Equals(pair.Key)))
+                .Where(pair => pair.Value > 0.05)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
             if (fixedPowerList.Count > 0)
             {
                 var powerSum = fixedPowerList.Aggregate(0.0, (sum, pair) => pair.Value + sum);
@@ -310,14 +317,12 @@ namespace ChBot
                         break;
                     }
                 }
-                context.ThreadContext.SetCurrent(pickedKey, true);
+                return pickedKey;
             }
             else
             {
-                context.ThreadContext.SetCurrent(null, false);
+                return null;
             }
-
-            return context.ThreadContext.GetCurrent();
         }
 
         private async Task CheckIP()

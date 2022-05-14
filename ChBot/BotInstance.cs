@@ -222,7 +222,7 @@ namespace ChBot
                     item.ForeColor = Color.White;
                 }
 
-                if (context.ThreadContext.IsCurrent((BotThread)item.Tag))
+                if (context.ClientList.Any(client => client.current != null && client.current.Equals((BotThread)item.Tag)))
                 {
                     item.BackColor = Color.Yellow;
                     item.ForeColor = Color.Red;
@@ -311,18 +311,6 @@ namespace ChBot
         private void toolStripMenuItem6_Click(object sender, EventArgs e)
         {
             context.ThreadContext.RemoveEnabled(GetSelectedThreads());
-            UpdateUI();
-        }
-
-        //カレントスレッドに設定
-        private void toolStripMenuItem7_Click(object sender, EventArgs e)
-        {
-            BotThread thread = GetSelectedThreads().First;
-
-            if (thread != null)
-            {
-                context.ThreadContext.SetCurrent(thread, true);
-            }
             UpdateUI();
         }
 
@@ -619,8 +607,10 @@ namespace ChBot
 
             try
             {
-                var current = context.ThreadContext.GetCurrent();
-                await Network.GetDat(current, context.ApiSid);
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                    await Network.GetDat(thread, context.ApiSid);
             }
             catch (Exception er)
             {
@@ -636,8 +626,10 @@ namespace ChBot
 
             try
             {
-                var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, UnixTime.Now().ToString(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                    await Network.Post(thread, UnixTime.Now().ToString(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -689,16 +681,6 @@ namespace ChBot
                 context.Loginer.Show();
                 context.Loginer.Focus();
             }
-        }
-
-        private void ThreadListListView_DoubleClick(object sender, EventArgs e)
-        {
-            var thread = GetSelectedThreads().First;
-            if (thread != null)
-            {
-                context.ThreadContext.SetCurrent(thread, true);
-            }
-            UpdateUI();
         }
 
         private async void button11_Click(object sender, EventArgs e)
@@ -771,8 +753,10 @@ namespace ChBot
 
             try
             {
-                var target = context.ThreadContext.GetCurrent();
-                await Network.Post(target, context.Message, context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                    await Network.Post(thread, context.Message, context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
             {
@@ -797,30 +781,6 @@ namespace ChBot
             }
 
             button12.Enabled = true;
-        }
-
-        private async void button13_Click(object sender, EventArgs e)
-        {
-            button13.Enabled = false;
-
-            try
-            {
-                var target = context.ThreadContext.GetCurrent();
-                var tasks = new List<Task>();
-                for (var i = 0; i < 3; i++)
-                {
-                    tasks.Add(Network.Post(target, Generator.makeKanjiRandom(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1));
-                }
-                await Task.WhenAll(tasks);
-            }
-            catch (Exception er)
-            {
-                MessageBox.Show(er.Message);
-                if (er as PostFailureException != null)
-                    MessageBox.Show(((PostFailureException)er).Result);
-            }
-
-            button13.Enabled = true;
         }
 
         private async void button14_Click(object sender, EventArgs e)
@@ -870,7 +830,6 @@ namespace ChBot
 
             try
             {
-                var target = context.ThreadContext.GetCurrent();
                 var UA = Network.GetRandomUseragent(BotUA.ChMate);
                 var Mona = await Network.GetMonaKey(UA, comboBox1.SelectedIndex - 1);
                 context.UAMonaKeyPair = new BotUAMonaKeyPair(UA, Mona, false);
@@ -909,7 +868,6 @@ namespace ChBot
 
             try
             {
-                var target = context.ThreadContext.GetCurrent();
                 await Network.Build("mi.5ch.net", "news4vip", UnixTime.Now().ToString(), UnixTime.Now().ToString(), context.Name, context.Mail, context.UAMonaKeyPair, comboBox1.SelectedIndex - 1);
             }
             catch (Exception er)
