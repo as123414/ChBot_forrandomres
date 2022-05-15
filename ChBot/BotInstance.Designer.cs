@@ -110,6 +110,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SelectDBFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.button13 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.IntervalNumericUpDown)).BeginInit();
             this.ThreadLlistContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -149,7 +150,7 @@
             this.MessageTextBox.Multiline = true;
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.MessageTextBox.Size = new System.Drawing.Size(222, 241);
+            this.MessageTextBox.Size = new System.Drawing.Size(222, 242);
             this.MessageTextBox.TabIndex = 0;
             this.MessageTextBox.WordWrap = false;
             this.MessageTextBox.TextChanged += new System.EventHandler(this.MessageTextBox_TextChanged);
@@ -175,7 +176,7 @@
             this.ResultWebBrowser.Name = "ResultWebBrowser";
             this.ResultWebBrowser.ScriptErrorsSuppressed = true;
             this.ResultWebBrowser.ScrollBarsEnabled = false;
-            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 239);
+            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 240);
             this.ResultWebBrowser.TabIndex = 3;
             // 
             // IntervalNumericUpDown
@@ -208,7 +209,7 @@
             this.ThreadListListView.Margin = new System.Windows.Forms.Padding(2);
             this.ThreadListListView.Name = "ThreadListListView";
             this.ThreadListListView.ShowItemToolTips = true;
-            this.ThreadListListView.Size = new System.Drawing.Size(391, 241);
+            this.ThreadListListView.Size = new System.Drawing.Size(391, 242);
             this.ThreadListListView.TabIndex = 14;
             this.toolTip1.SetToolTip(this.ThreadListListView, "赤 - 有効\r\n黄 - 現在の書き込み対象\r\n灰 - 無視されます");
             this.ThreadListListView.UseCompatibleStateImageBehavior = false;
@@ -251,7 +252,7 @@
             this.toolStripMenuItem5.ForeColor = System.Drawing.SystemColors.ControlText;
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
             this.toolStripMenuItem5.ShortcutKeyDisplayString = "Enter";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem5.Text = "有効(&E)";
             this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
             // 
@@ -259,7 +260,7 @@
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
             this.toolStripMenuItem6.ShortcutKeyDisplayString = "Delete";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem6.Text = "有効解除(&U)";
             this.toolStripMenuItem6.Click += new System.EventHandler(this.toolStripMenuItem6_Click);
             // 
@@ -269,7 +270,7 @@
             this.toolStripMenuItem1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.ShortcutKeyDisplayString = "";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem1.Text = "無視(&I)";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -277,7 +278,7 @@
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
             this.toolStripMenuItem4.ShortcutKeyDisplayString = "";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem4.Text = "無視解除(&D)";
             this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
             // 
@@ -285,14 +286,14 @@
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.ShortcutKeyDisplayString = "";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem2.Text = "ブラウザで開く(&B)";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // toolStripMenuItem8
             // 
             this.toolStripMenuItem8.Name = "toolStripMenuItem8";
-            this.toolStripMenuItem8.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem8.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem8.Text = "JaneStyleで開く(&J)";
             this.toolStripMenuItem8.Click += new System.EventHandler(this.toolStripMenuItem8_Click);
             // 
@@ -300,7 +301,7 @@
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.ShortcutKeyDisplayString = "";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem3.Text = "URLをコピー(&C)";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
             // 
@@ -308,7 +309,7 @@
             // 
             this.toolStripMenuItem9.Name = "toolStripMenuItem9";
             this.toolStripMenuItem9.ShortcutKeyDisplayString = "";
-            this.toolStripMenuItem9.Size = new System.Drawing.Size(259, 22);
+            this.toolStripMenuItem9.Size = new System.Drawing.Size(178, 22);
             this.toolStripMenuItem9.Text = "DAT取得(&G)";
             this.toolStripMenuItem9.Click += new System.EventHandler(this.toolStripMenuItem9_Click);
             // 
@@ -579,7 +580,7 @@
             // 
             this.splitContainer6.Panel2.Controls.Add(this.panel2);
             this.splitContainer6.Size = new System.Drawing.Size(855, 65);
-            this.splitContainer6.SplitterDistance = 500;
+            this.splitContainer6.SplitterDistance = 501;
             this.splitContainer6.SplitterWidth = 3;
             this.splitContainer6.TabIndex = 52;
             // 
@@ -606,7 +607,7 @@
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(2);
-            this.panel2.Size = new System.Drawing.Size(352, 65);
+            this.panel2.Size = new System.Drawing.Size(351, 65);
             this.panel2.TabIndex = 13;
             // 
             // button18
@@ -648,6 +649,7 @@
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.button13);
             this.splitContainer2.Panel2.Controls.Add(this.textBox1);
             this.splitContainer2.Panel2.Controls.Add(this.label1);
             this.splitContainer2.Panel2.Controls.Add(this.label9);
@@ -691,7 +693,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.LoginButton);
             this.splitContainer2.Panel2.Padding = new System.Windows.Forms.Padding(2);
             this.splitContainer2.Size = new System.Drawing.Size(855, 536);
-            this.splitContainer2.SplitterDistance = 241;
+            this.splitContainer2.SplitterDistance = 242;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 15;
             // 
@@ -710,7 +712,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(855, 241);
+            this.splitContainer3.Size = new System.Drawing.Size(855, 242);
             this.splitContainer3.SplitterDistance = 222;
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
@@ -729,7 +731,7 @@
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.MessageTextBox);
-            this.splitContainer5.Size = new System.Drawing.Size(222, 241);
+            this.splitContainer5.Size = new System.Drawing.Size(222, 242);
             this.splitContainer5.SplitterDistance = 25;
             this.splitContainer5.SplitterWidth = 3;
             this.splitContainer5.TabIndex = 1;
@@ -749,7 +751,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.ThreadListListView);
-            this.splitContainer4.Size = new System.Drawing.Size(630, 241);
+            this.splitContainer4.Size = new System.Drawing.Size(630, 242);
             this.splitContainer4.SplitterDistance = 236;
             this.splitContainer4.SplitterWidth = 3;
             this.splitContainer4.TabIndex = 0;
@@ -762,7 +764,7 @@
             this.panel6.Location = new System.Drawing.Point(0, 0);
             this.panel6.Margin = new System.Windows.Forms.Padding(2);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(236, 241);
+            this.panel6.Size = new System.Drawing.Size(236, 242);
             this.panel6.TabIndex = 4;
             // 
             // textBox1
@@ -826,10 +828,10 @@
             // 
             this.button4.AutoSize = true;
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button4.Location = new System.Drawing.Point(478, 62);
+            this.button4.Location = new System.Drawing.Point(776, 62);
             this.button4.Margin = new System.Windows.Forms.Padding(2);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(79, 25);
+            this.button4.Size = new System.Drawing.Size(74, 25);
             this.button4.TabIndex = 119;
             this.button4.Text = "Build";
             this.button4.UseVisualStyleBackColor = true;
@@ -852,7 +854,7 @@
             // 
             this.button2.AutoSize = true;
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.Location = new System.Drawing.Point(705, 63);
+            this.button2.Location = new System.Drawing.Point(703, 62);
             this.button2.Margin = new System.Windows.Forms.Padding(2);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(82, 25);
@@ -865,10 +867,10 @@
             // 
             this.button16.AutoSize = true;
             this.button16.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button16.Location = new System.Drawing.Point(705, 33);
+            this.button16.Location = new System.Drawing.Point(704, 33);
             this.button16.Margin = new System.Windows.Forms.Padding(2);
             this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(74, 25);
+            this.button16.Size = new System.Drawing.Size(68, 25);
             this.button16.TabIndex = 118;
             this.button16.Text = "Get Mona";
             this.button16.UseVisualStyleBackColor = true;
@@ -894,7 +896,7 @@
             this.button14.Location = new System.Drawing.Point(641, 62);
             this.button14.Margin = new System.Windows.Forms.Padding(2);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(74, 25);
+            this.button14.Size = new System.Drawing.Size(60, 25);
             this.button14.TabIndex = 116;
             this.button14.Text = "Get Line";
             this.button14.UseVisualStyleBackColor = true;
@@ -907,7 +909,7 @@
             this.button12.Location = new System.Drawing.Point(641, 33);
             this.button12.Margin = new System.Windows.Forms.Padding(2);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(74, 25);
+            this.button12.Size = new System.Drawing.Size(67, 25);
             this.button12.TabIndex = 114;
             this.button12.Text = "Send Line";
             this.button12.UseVisualStyleBackColor = true;
@@ -959,7 +961,7 @@
             this.SearchButton.Name = "SearchButton";
             this.SearchButton.Size = new System.Drawing.Size(137, 27);
             this.SearchButton.TabIndex = 106;
-            this.SearchButton.Text = "スレタイ条件のみで検索";
+            this.SearchButton.Text = "スレタイと必死で検索";
             this.SearchButton.UseVisualStyleBackColor = true;
             this.SearchButton.Click += new System.EventHandler(this.SearchButton_Click);
             // 
@@ -1088,6 +1090,16 @@
             this.timer1.Enabled = true;
             this.timer1.Interval = 43200000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // button13
+            // 
+            this.button13.Location = new System.Drawing.Point(463, 33);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(49, 23);
+            this.button13.TabIndex = 126;
+            this.button13.Text = "Reset";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
             // BotInstance
             // 
@@ -1220,5 +1232,6 @@
         public System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button17;
+        private System.Windows.Forms.Button button13;
     }
 }

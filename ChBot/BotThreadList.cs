@@ -8,6 +8,24 @@ namespace ChBot
 {
     public class BotThreadList : List<BotThread>
     {
+        new public void Add(BotThread thread)
+        {
+            if (thread != null)
+            {
+                var exists = false;
+                foreach (BotThread item in this)
+                {
+                    if (item.Equals(thread))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists)
+                    base.Add(thread);
+            }
+        }
+
         new public void Remove(BotThread thread)
         {
             if (thread != null)

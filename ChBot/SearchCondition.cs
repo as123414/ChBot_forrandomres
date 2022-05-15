@@ -34,7 +34,6 @@ namespace ChBot
         public int NeedMatchCount { get; set; }
         public bool Enabled { get; set; }
 
-        public BotThreadList everMatchList;
         public long lastHissiLoadTime;
         public BotThreadList hissiThreads;
 
@@ -57,7 +56,6 @@ namespace ChBot
             MinNo = 1;
             MaxNo = 10000;
             EverMatch = false;
-            everMatchList = new BotThreadList();
             Trip = "";
             hissiThreads = new BotThreadList();
             lastHissiLoadTime = 0;
@@ -79,11 +77,11 @@ namespace ChBot
                     && UnixTime.Now() - thread.Key <= MaxTime
                     && thread.Key % KeyMod == KeyRem
                     && thread.Rank >= MinNo
-                    && thread.Rank <= MaxNo) || everMatchList.Contains(thread);
+                    && thread.Rank <= MaxNo);
             }
             else if (SearchMode == SearchModes.Url)
             {
-                return thread.Url == Url || everMatchList.Contains(thread);
+                return thread.Url == Url;
             }
             else
             {
@@ -126,56 +124,48 @@ namespace ChBot
             return isMathWord;
         }
 
+        public async Task<bool> IsMatchMiddleCondition(BotThread thread)
+        {
+            if (!Enabled)
+                throw new Exception("Disabled search condition.");
+
+            if (!IsMatchLiteCondition(thread))
+            {
+                return false;
+            }
+            else
+            {
+                if (Trip != "" && UnixTime.Now() - lastHissiLoadTime > 60)
+                {
+                    hissiThreads = await Network.GetTripWroteThreadList(DateTime.Now.ToString("yyyyMMdd"), Trip, thread.Bbs);
+                    lastHissiLoadTime = UnixTime.Now();
+                }
+
+                return Trip == "" || hissiThreads.Contains(thread);
+            }
+        }
+
         public async Task<bool> IsMatchFullCondition(BotThread thread, string ApiSid)
         {
             if (!Enabled)
                 throw new Exception("Disabled search condition.");
 
-            var matched = everMatchList.Contains(thread);
-            if (!matched)
+            if (!await IsMatchMiddleCondition(thread))
             {
-                if (!IsMatchLiteCondition(thread))
-                {
-                    matched = false;
-                }
-                else
-                {
-                    if (Trip != "" && UnixTime.Now() - lastHissiLoadTime > 60)
-                    {
-                        hissiThreads = await Network.GetTripWroteThreadList(DateTime.Now.ToString("yyyyMMdd"), Trip, thread.Bbs);
-                        lastHissiLoadTime = UnixTime.Now();
-                    }
-
-                    if (Trip != "" && !hissiThreads.Contains(thread))
-                    {
-                        matched = false;
-                    }
-                    else
-                    {
-                        var resList = Network.DatToDetailResList(await Network.GetDat(thread, ApiSid));
-                        thread.ResListCache = resList;
-
-                        matched = resList.Where(res =>
-                            int.Parse(res["No"]) <= MaxTarget
-                            && (BodySearchText == "" || Regex.IsMatch(res["Message"], BodySearchText, RegexOptions.Singleline))
-                            && (NameSearchText == "" || Regex.IsMatch(res["Name"], NameSearchText))
-                            && (IDMatchText == "" || Regex.IsMatch(res["ID"], IDMatchText))
-                            && (OptionSearchText == "" || Regex.IsMatch(res["Option"], OptionSearchText))
-                        ).Count() >= NeedMatchCount;
-                    }
-                }
-            }
-
-            if (matched)
-            {
-                if (EverMatch && !everMatchList.Contains(thread))
-                    everMatchList.Add(thread);
-
-                return true;
+                return false;
             }
             else
             {
-                return false;
+                var resList = Network.DatToDetailResList(await Network.GetDat(thread, ApiSid));
+                thread.ResListCache = resList;
+
+                return resList.Where(res =>
+                     int.Parse(res["No"]) <= MaxTarget
+                     && (BodySearchText == "" || Regex.IsMatch(res["Message"], BodySearchText, RegexOptions.Singleline))
+                     && (NameSearchText == "" || Regex.IsMatch(res["Name"], NameSearchText))
+                     && (IDMatchText == "" || Regex.IsMatch(res["ID"], IDMatchText))
+                     && (OptionSearchText == "" || Regex.IsMatch(res["Option"], OptionSearchText))
+                 ).Count() >= NeedMatchCount;
             }
         }
 

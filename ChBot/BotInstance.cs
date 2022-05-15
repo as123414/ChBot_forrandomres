@@ -146,7 +146,8 @@ namespace ChBot
             SearchButton.Enabled = false;
             try
             {
-                await context.SearchThread();
+                context.everMatchList.Clear();
+                await context.MiddleSearchThread();
             }
             catch (Exception er)
             {
@@ -716,6 +717,7 @@ namespace ChBot
             BodySearchButton.Enabled = false;
             try
             {
+                context.everMatchList.Clear();
                 await context.FullSearchThread();
             }
             catch (Exception er)
@@ -939,6 +941,11 @@ namespace ChBot
                 context.ClientList = delProxies;
             }
             UpdateUI(UIParts.Other);
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            context.everMatchList.Clear();
         }
     }
 }
