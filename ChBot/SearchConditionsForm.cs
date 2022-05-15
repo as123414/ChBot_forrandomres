@@ -67,35 +67,75 @@ namespace ChBot
             var prevDisableEvents = disableEvents;
             disableEvents = true;
 
-            var selectedIndex = 0;
-            if (listView1.SelectedItems.Count > 0)
-                selectedIndex = listView1.SelectedItems[0].Index;
-
-            listView1.Items.Clear();
-            foreach (var condition in context.SearchConditions)
+            var refresh = false;
+            var shownSearchConditions = new List<SearchCondition>();
+            foreach (ListViewItem item in listView1.Items)
+                shownSearchConditions.Add((SearchCondition)item.Tag);
+            if (shownSearchConditions.Count != context.SearchConditions.Count)
             {
-                var item = new ListViewItem(new[] {
-                    condition.SearchMode == SearchCondition.SearchModes.Url ? "URL" :
-                    condition.SearchMode == SearchCondition.SearchModes.Word ? "Word" : "",
-                    condition.SearchMode == SearchCondition.SearchModes.Url ? condition.Url : condition.Word,
-                    condition.MinRes + "-" + condition.MaxRes,
-                    condition.MinTime + "-" + condition.MaxTime,
-                    condition.KeyMod + "n+" + condition.KeyRem,
-                    condition.BodySearchText,
-                    condition.NameSearchText
-                });
-
-                item.Checked = condition.Enabled;
-                if (!condition.Enabled)
-                    item.BackColor = Color.Silver;
-                item.Tag = condition;
-                listView1.Items.AddRange(new[] { item });
+                refresh = true;
+            }
+            else
+            {
+                for (var i = 0; i < shownSearchConditions.Count; i++)
+                {
+                    if (shownSearchConditions[i] != context.SearchConditions[i])
+                    {
+                        refresh = true;
+                        break;
+                    }
+                }
             }
 
-            var newSelectedIndex = Math.Min(listView1.Items.Count - 1, selectedIndex);
-            listView1.Items[newSelectedIndex].Selected = true;
-            selectedSearchCondition = (SearchCondition)listView1.Items[newSelectedIndex].Tag;
+            if (refresh)
+            {
+                var selectedIndex = 0;
+                if (listView1.SelectedItems.Count > 0)
+                    selectedIndex = listView1.SelectedItems[0].Index;
 
+                listView1.Items.Clear();
+                foreach (var condition in context.SearchConditions)
+                {
+                    var item = new ListViewItem(new[] {
+                        condition.SearchMode == SearchCondition.SearchModes.Url ? "URL" :
+                        condition.SearchMode == SearchCondition.SearchModes.Word ? "Word" : "",
+                        condition.SearchMode == SearchCondition.SearchModes.Url ? condition.Url : condition.Word,
+                        condition.MinRes + "-" + condition.MaxRes,
+                        condition.MinTime + "-" + condition.MaxTime,
+                        condition.KeyMod + "n+" + condition.KeyRem,
+                        condition.BodySearchText,
+                        condition.NameSearchText
+                    });
+
+                    item.Checked = condition.Enabled;
+                    item.BackColor = condition.Enabled ? Color.White : Color.Silver;
+                    item.Tag = condition;
+                    listView1.Items.AddRange(new[] { item });
+                }
+
+                var newSelectedIndex = Math.Min(listView1.Items.Count - 1, selectedIndex);
+                listView1.Items[newSelectedIndex].Selected = true;
+                selectedSearchCondition = (SearchCondition)listView1.Items[newSelectedIndex].Tag;
+            }
+            else
+            {
+                foreach (ListViewItem item in listView1.Items)
+                {
+                    var condition = (SearchCondition)item.Tag;
+
+                    item.SubItems[0].Text = condition.SearchMode == SearchCondition.SearchModes.Url ? "URL" :
+                    condition.SearchMode == SearchCondition.SearchModes.Word ? "Word" : "";
+                    item.SubItems[1].Text = condition.SearchMode == SearchCondition.SearchModes.Url ? condition.Url : condition.Word;
+                    item.SubItems[2].Text = condition.MinRes + "-" + condition.MaxRes;
+                    item.SubItems[3].Text = condition.MinTime + "-" + condition.MaxTime;
+                    item.SubItems[4].Text = condition.KeyMod + "n+" + condition.KeyRem;
+                    item.SubItems[5].Text = condition.BodySearchText;
+                    item.SubItems[6].Text = condition.NameSearchText;
+
+                    item.Checked = condition.Enabled;
+                    item.BackColor = condition.Enabled ? Color.White : Color.Silver;
+                }
+            }
             disableEvents = prevDisableEvents;
         }
 
