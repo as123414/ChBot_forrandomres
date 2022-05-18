@@ -256,7 +256,13 @@ namespace ChBot
                         hasLastChance = false;
                         try { await Network.SendLineMessage("エラーのためコマンドを試行します"); } catch { }
                         ReportProgress("RESTART_USB_STARTED");
-                        try { await Network.RestartUsb(DeviceIndex); } catch { }
+                        try
+                        {
+                            await Network.RestartUsb(DeviceIndex);
+                            await Network.DisableWiFi(DeviceIndex);
+                            await Network.EnableUsbTethering(DeviceIndex);
+                        }
+                        catch { }
                         ReportProgress("RESTART_USB_COMPLETED");
                         return 0;
                     }

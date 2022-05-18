@@ -701,6 +701,19 @@ namespace ChBot
             await Task.Delay(500);
         }
 
+        public static async Task EnableUsbTethering(int deviceIndex)
+        {
+            await Task.Run(() =>
+            {
+                using (var invoker = new RunspaceInvoke())
+                {
+                    invoker.Invoke("adb -s " + DeviceIDList[deviceIndex] + " shell svc usb setFunctions rndis\r\n");
+                }
+            });
+
+            await Task.Delay(500);
+        }
+
         public static async Task<string> GetIPAddress(int deviceIndex)
         {
             var req = (HttpWebRequest)WebRequest.Create(ipGetUrl);

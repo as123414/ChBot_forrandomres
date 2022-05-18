@@ -810,6 +810,8 @@ namespace ChBot
 
             button15.Enabled = false;
             await Network.RestartUsb(comboBox1.SelectedIndex - 1);
+            await Network.DisableWiFi(comboBox1.SelectedIndex - 1);
+            await Network.EnableUsbTethering(comboBox1.SelectedIndex - 1);
             button15.Enabled = true;
         }
 
