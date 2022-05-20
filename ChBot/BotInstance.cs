@@ -399,6 +399,7 @@ namespace ChBot
             SearchResultRadioButton.Checked = context.ListMode == BotContext.ListModes.Search;
             HistoryRadioButton.Checked = context.ListMode == BotContext.ListModes.History;
             textBox2.Text = context.HomeIP;
+            checkBox1.Checked = context.AllowDuplicatePost;
 
             searchConditionsForm.UpdateUI();
 
@@ -948,6 +949,14 @@ namespace ChBot
         private void button13_Click(object sender, EventArgs e)
         {
             context.everMatchList.Clear();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (disableEvents)
+                return;
+
+            context.AllowDuplicatePost = checkBox1.Checked;
         }
     }
 }

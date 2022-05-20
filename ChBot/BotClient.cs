@@ -309,7 +309,7 @@ namespace ChBot
         private BotThread SetNextCurrent()
         {
             var fixedPowerList = context.PowerList
-                .Where(pair => context.ClientList.All(client => client.current == null || !client.current.Equals(pair.Key)))
+                .Where(pair => context.AllowDuplicatePost || context.ClientList.All(client => client.current == null || !client.current.Equals(pair.Key)))
                 .Where(pair => pair.Value > 0.05)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 

@@ -34,6 +34,7 @@ namespace ChBot
         public string ApiSid { get; set; }
         public string HomeIP { get; set; }
         public BotUAMonaKeyPair UAMonaKeyPair { get; set; }
+        public bool AllowDuplicatePost { get; set; }
 
         public List<BotUAMonaKeyPair> UAMonaKeyPairs { get; set; }
 
@@ -187,6 +188,7 @@ namespace ChBot
             HomeIP = "";
             Password = "";
             SearchConditions = new List<SearchCondition>() { new SearchCondition() };
+            AllowDuplicatePost = false;
         }
 
         public void Login()
@@ -237,7 +239,7 @@ namespace ChBot
         public async Task GatherMonaKey()
         {
             UAMonaKeyPairs = new List<BotUAMonaKeyPair>();
-            for (var i = 0; i < 50; i++)
+            for (var i = 0; i < 100; i++)
             {
                 if (i % 5 == 0)
                     await Network.ChangeIP(0);
@@ -252,14 +254,14 @@ namespace ChBot
                 catch (PostFailureException) { }*/
                 var pair = new BotUAMonaKeyPair(ua, mona, false);
                 UAMonaKeyPairs.Add(pair);
-                Console.WriteLine("[" + (i + 1) + "/50] " + ua + "," + mona);
+                Console.WriteLine("[" + (i + 1) + "/100] " + ua + "," + mona);
             }
         }
 
         public async Task FillMonaKey()
         {
             UAMonaKeyPairs = UAMonaKeyPairs.Where(p => p.Used).ToList();
-            var addNum = 50 - UAMonaKeyPairs.Count;
+            var addNum = 100 - UAMonaKeyPairs.Count;
             var newUAMonaKeyPairs = new List<BotUAMonaKeyPair>();
             for (var i = 0; i < addNum; i++)
             {
@@ -414,7 +416,8 @@ namespace ChBot
                 User,
                 Password,
                 HomeIP,
-                SearchConditions
+                SearchConditions,
+                AllowDuplicatePost
             };
 
             var jsonstr = JsonSerializer.Serialize(settings, new JsonSerializerOptions
@@ -456,6 +459,7 @@ namespace ChBot
                     condition.Resume(conditionJson);
                     return condition;
                 }).ToList();
+                AllowDuplicatePost = settings["AllowDuplicatePost"].GetBoolean();
             }
             catch { }
         }
@@ -474,6 +478,7 @@ namespace ChBot
                 Password,
                 HomeIP,
                 SearchConditions,
+                AllowDuplicatePost,
 
                 ListMode,
                 JanePath,
@@ -568,6 +573,8 @@ namespace ChBot
 
                 if (ui.manager.autoStart && state.GetProperty("SearchWorking").GetBoolean())
                     autoStartSearch = true;
+
+                AllowDuplicatePost = state.GetProperty("AllowDuplicatePost").GetBoolean();
             }
             catch { }
         }
