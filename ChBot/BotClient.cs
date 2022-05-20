@@ -266,6 +266,12 @@ namespace ChBot
                         ReportProgress("RESTART_USB_COMPLETED");
                         return 0;
                     }
+                    else if (UnixTime.Now() - Properties.Settings.Default.LastRetry > 120)
+                    {
+                        try { await Network.SendLineMessage("エラーのため再起動します"); } catch { }
+                        ui.manager.restartFlag = true;
+                        return 1;
+                    }
                     else
                     {
                         // それでもリトライ回数が上限を超えたら動作を停止する

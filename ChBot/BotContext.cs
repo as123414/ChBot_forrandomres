@@ -105,8 +105,17 @@ namespace ChBot
                 searchAttempt++;
                 if (searchAttempt >= 10)
                 {
-                    code = 1;
-                    try { await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
+                    if (UnixTime.Now() - Properties.Settings.Default.LastRetry > 120)
+                    {
+                        try { await Network.SendLineMessage("更新エラーのため再起動します"); } catch { }
+                        ui.manager.restartFlag = true;
+                        code = 1;
+                    }
+                    else
+                    {
+                        code = 1;
+                        try { await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
+                    }
                 }
             }
             finally
@@ -533,13 +542,13 @@ namespace ChBot
                 }).ToList();
 
                 UAMonaKeyPairs = state.GetProperty("UAMonaKeyPairs").EnumerateArray().Select(recodeJson =>
-               {
-                   var recode = recodeJson.GetString();
-                   var ua = recode.Split(',')[0];
-                   var mona = recode.Split(',')[1];
-                   var used = recode.Split(',')[2];
-                   return new BotUAMonaKeyPair(ua, mona, used == "1");
-               }).ToList();
+                {
+                    var recode = recodeJson.GetString();
+                    var ua = recode.Split(',')[0];
+                    var mona = recode.Split(',')[1];
+                    var used = recode.Split(',')[2];
+                    return new BotUAMonaKeyPair(ua, mona, used == "1");
+                }).ToList();
 
                 var counter = 0;
                 foreach (var item in state.GetProperty("ProxyWindowState").EnumerateArray())

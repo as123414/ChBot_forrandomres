@@ -24,6 +24,7 @@ namespace ChBot
     {
         public List<BotInstance> instanceList = new List<BotInstance>();
         public bool autoStart = false;
+        public bool restartFlag = false;
 
         public void Test()
         {
@@ -259,13 +260,14 @@ namespace ChBot
                 return instance.context.searchTimerProceccing && UnixTime.Now() - instance.context.searchTimerProccessStartTime > 180;
             });
 
-            if (cond1 || cond2 || cond3)
+            if (cond1 || cond2 || cond3 || restartFlag)
             {
 #if DEBUG
                 return;
 #endif
                 Close();
                 Properties.Settings.Default.IsRestart = true;
+                Properties.Settings.Default.LastRetry = UnixTime.Now();
                 Properties.Settings.Default.Save();
                 Application.Restart();
                 File.AppendAllText(@"log.txt", "[" + DateTime.Now.ToString() + "] Auto restarted.\r\n");
