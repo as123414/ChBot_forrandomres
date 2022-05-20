@@ -352,6 +352,10 @@ namespace ChBot
             try
             {
                 timer2.Enabled = false;
+
+                if (instanceList.Any(ins => ins.context.Loginer.Logining))
+                    return;
+
                 var msg = await Network.GetLineMessage();
                 if (msg == "")
                     return;
@@ -401,7 +405,16 @@ namespace ChBot
                     return;
                 }
 
-                switch (msg)
+                var commands = new string[]{
+                    "GATHER_MONA",
+                    "START",
+                    "STOP",
+                    "CAPTURE",
+                    "REBOOT",
+                    "CLEAR_URL"
+                };
+
+                switch (Regex.IsMatch(msg, @"^\d+$") ? (int.Parse(msg) >= 0 && int.Parse(msg) < commands.Length ? commands[int.Parse(msg)] : msg.ToUpper()) : msg.ToUpper())
                 {
                     case "GATHER_MONA":
                         await Network.SendLineMessage("RECIEVED.");
@@ -433,10 +446,37 @@ namespace ChBot
                         await Network.SendLineImage(url3);
                         await Network.SendLineMessage("DONE.");
                         break;
+                    case "REBOOT":
+                        await Network.SendLineMessage("OK.");
+                        Close();
+                        Properties.Settings.Default.IsRestart = true;
+                        Properties.Settings.Default.Save();
+                        Application.Restart();
+                        break;
+                    case "CLEAR_URL":
+                        await Network.SendLineMessage("RECIEVED.");
+                        foreach (var instance in instanceList)
+                        {
+                            instance.context.SearchConditions = instance.context.SearchConditions.Where(condition => condition.SearchMode != SearchCondition.SearchModes.Url).ToList();
+                            instance.searchConditionsForm.UpdateUI();
+                        }
+                        await Task.Delay(500);
+                        foreach (var instance in instanceList)
+                        {
+                            var text = "[" + instance.InstanceName + "]\n" + string.Join("\n", instance.context.SearchConditions.Select(c => c.SearchMode == SearchCondition.SearchModes.Url ? c.Url : c.Word));
+                            await Network.SendLineMessage(text);
+                        }
+                        await Network.SendLineMessage("DONE.");
+                        break;
                     default:
                         await Network.SendLineMessage("UNRECOGNIZED.");
                         break;
                 }
+
+                var comTxt = "";
+                for (var i = 0; i < commands.Length; i++)
+                    comTxt += "[" + i + "] " + commands[i] + "\n";
+                await Network.SendLineMessage(comTxt.Trim());
             }
             catch (Exception er)
             {
