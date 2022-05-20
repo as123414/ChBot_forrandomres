@@ -41,7 +41,7 @@ namespace ChBot
             Working = false;
             this.ui = ui;
             this.context = context;
-            label6.Text = Attempt.ToString() + "/10";
+            label6.Text = Attempt.ToString() + "/3";
             RestTimeLabel.Text = PostCount.ToString();
             DeviceIndex = deviceIndex;
         }
@@ -247,7 +247,7 @@ namespace ChBot
                 WriteLog(_er.Message);
                 Attempt++;
                 ReportProgress("MAIN_FAILED");
-                if (Attempt >= 10)
+                if (Attempt >= 3)
                 {
                     if (hasLastChance)
                     {
@@ -419,7 +419,7 @@ namespace ChBot
                 case "MAIN_FAILED":
                     toolStripLabel1.Text = "";
                     label8.Visible = false;
-                    label6.Text = Attempt.ToString() + "/10";
+                    label6.Text = Attempt.ToString() + "/3";
                     break;
                 case "MAIN_FAIL_STOP_COMPLETED":
                     ui.manager.UpdateUI();
@@ -427,7 +427,7 @@ namespace ChBot
                 case "MAIN_COMPLETED":
                     label8.Visible = false;
                     toolStripLabel1.Text = "";
-                    label6.Text = Attempt.ToString() + "/10";
+                    label6.Text = Attempt.ToString() + "/3";
                     ui.UpdateUI();
                     break;
                 default:

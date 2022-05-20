@@ -103,7 +103,7 @@ namespace ChBot
                 var _er = er as AggregateException == null ? er : er.InnerException;
                 WriteLog(_er.Message);
                 searchAttempt++;
-                if (searchAttempt >= 10)
+                if (searchAttempt >= 3)
                 {
                     if (UnixTime.Now() - Properties.Settings.Default.LastRetry > 120)
                     {
