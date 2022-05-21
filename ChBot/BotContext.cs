@@ -59,6 +59,8 @@ namespace ChBot
         public bool toStop = false;
         public Dictionary<BotThread, double> PowerList { get; set; }
         public bool waitingReboot = false;
+        public bool pausing = false;
+        public long pauseStartTime = 0;
 
         public BotContext(BotInstance ui)
         {
@@ -80,7 +82,8 @@ namespace ChBot
 
         private async void SearchTimer_Tick(object sender, EventArgs e)
         {
-            if (toStop || waitingReboot) return;
+            if (toStop || waitingReboot || (pausing && UnixTime.Now() - pauseStartTime < 600))
+                return;
 
             SearchCount--;
             SearchCount = SearchCount < 0 ? 0 : SearchCount;
@@ -94,6 +97,12 @@ namespace ChBot
                 searchTimerProceccing = true;
                 searchTimerProccessStartTime = UnixTime.Now();
                 searchTimer.Enabled = false;
+
+                if (pausing)
+                {
+                    try { await Network.SendLineMessage(ui.InstanceName + ":動作再開しました"); } catch { }
+                    pausing = false;
+                }
 
                 await RefreshThread();
 
@@ -125,7 +134,11 @@ namespace ChBot
             {
                 searchTimerProceccing = false;
                 if (code == 1)
-                    await StopAttack();
+                {
+                    pausing = true;
+                    pauseStartTime = UnixTime.Now();
+                    //await StopAttack();
+                }
                 searchTimer.Enabled = SearchWorking;
                 SearchCount = 10;
                 ui.label9.Text = SearchCount.ToString();

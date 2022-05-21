@@ -28,6 +28,8 @@ namespace ChBot
         public int DeviceIndex { get; private set; }
         public BotThread current = null;
         public bool waitingReboot = false;
+        public bool pausing = false;
+        public long pauseStartTime = 0;
 
         public BotClient(BotInstance ui, BotContext context, int deviceIndex)
         {
@@ -113,7 +115,8 @@ namespace ChBot
 
         private async void timer1_Tick(object sender, EventArgs e)
         {
-            if (toStop || waitingReboot) return;
+            if (toStop || waitingReboot || (pausing && UnixTime.Now() - pauseStartTime < 600) || context.pausing)
+                return;
 
             PostCount -= 1;
             PostCount = PostCount < 0 ? 0 : PostCount;
@@ -133,6 +136,12 @@ namespace ChBot
                 {
                     try
                     {
+                        if (pausing)
+                        {
+                            try { await Network.SendLineMessage("[" + ui.InstanceName + "]" + Network.DeviceIDList[DeviceIndex] + ":動作再開しました"); } catch { }
+                            pausing = false;
+                        }
+
                         code = await Proccess();
                     }
                     finally
@@ -154,9 +163,11 @@ namespace ChBot
                 timer1Proceccing = false;
                 if (code == 1)
                 {
-                    await Stop();
-                    ui.UpdateUI(BotInstance.UIParts.Other);
-                    ui.manager.UpdateUI();
+                    pausing = true;
+                    pauseStartTime = UnixTime.Now();
+                    /*await Stop();
+                        ui.UpdateUI(BotInstance.UIParts.Other);
+                        ui.manager.UpdateUI();*/
                 }
                 timer1.Enabled = Working;
             }
