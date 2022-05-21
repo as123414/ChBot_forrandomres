@@ -27,6 +27,7 @@ namespace ChBot
         public bool toStop = false;
         public int DeviceIndex { get; private set; }
         public BotThread current = null;
+        public bool waitingReboot = false;
 
         public BotClient(BotInstance ui, BotContext context, int deviceIndex)
         {
@@ -112,7 +113,7 @@ namespace ChBot
 
         private async void timer1_Tick(object sender, EventArgs e)
         {
-            if (toStop) return;
+            if (toStop || waitingReboot) return;
 
             PostCount -= 1;
             PostCount = PostCount < 0 ? 0 : PostCount;
@@ -270,7 +271,8 @@ namespace ChBot
                     {
                         try { await Network.SendLineMessage("エラーのため再起動します"); } catch { }
                         ui.manager.restartFlag = true;
-                        return 1;
+                        waitingReboot = true;
+                        return 0;
                     }
                     else
                     {

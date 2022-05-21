@@ -58,6 +58,7 @@ namespace ChBot
         public BotThreadList notifiedThreads = new BotThreadList();
         public bool toStop = false;
         public Dictionary<BotThread, double> PowerList { get; set; }
+        public bool waitingReboot = false;
 
         public BotContext(BotInstance ui)
         {
@@ -79,7 +80,7 @@ namespace ChBot
 
         private async void SearchTimer_Tick(object sender, EventArgs e)
         {
-            if (toStop) return;
+            if (toStop || waitingReboot) return;
 
             SearchCount--;
             SearchCount = SearchCount < 0 ? 0 : SearchCount;
@@ -110,7 +111,8 @@ namespace ChBot
                     {
                         try { await Network.SendLineMessage("更新エラーのため再起動します"); } catch { }
                         ui.manager.restartFlag = true;
-                        code = 1;
+                        waitingReboot = true;
+                        code = 0;
                     }
                     else
                     {
