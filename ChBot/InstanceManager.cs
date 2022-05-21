@@ -103,8 +103,12 @@ namespace ChBot
                                 client.Show();
                         }
                         newInstance.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), instanceData.GetProperty("WindowState").GetString());
+                        newInstance.Location = new Point(instanceData.GetProperty("LocationX").GetInt32(), instanceData.GetProperty("LocationY").GetInt32());
                         newInstance.UpdateUI();
                     }
+
+                    WindowState = (FormWindowState)Properties.Settings.Default.WindowState;
+                    Location = Properties.Settings.Default.Location;
                 }
             }
             catch { }
@@ -147,6 +151,8 @@ namespace ChBot
                 instance.InstanceName,
                 instance.Visible,
                 instance.WindowState,
+                LocationX = instance.Location.X,
+                LocationY = instance.Location.Y,
                 State = instance.context.GetState()
             });
 
@@ -160,6 +166,8 @@ namespace ChBot
             jsonstr = Regex.Replace(jsonstr, @"([^\\])\\u3000", "$1　");
             jsonstr = Regex.Replace(jsonstr, @"^\\u3000", "　");
             Properties.Settings.Default.InstanceStates = jsonstr;
+            Properties.Settings.Default.WindowState = (int)WindowState;
+            Properties.Settings.Default.Location = Location;
             Properties.Settings.Default.Save();
         }
 
