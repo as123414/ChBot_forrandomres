@@ -180,7 +180,7 @@ namespace ChBot
                     thread.ResListCache = Network.DatToDetailResList(await Network.GetDat(thread, ApiSid));
                 var anchorResList = thread.ResListCache.Where(res => Regex.IsMatch(res["Message"], @">>\d+.*[^\d\.\-\s>]", RegexOptions.Singleline));
                 var power = anchorResList.Aggregate(0.0, (p, res) => 1.0 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
-                var ageResList = thread.ResListCache.Where(res => int.Parse(res["No"]) >= 8 && res["Mail"] != "sage");
+                var ageResList = thread.ResListCache.Where(res => res["Mail"] != "sage");
                 power += ageResList.Aggregate(0.0, (p, res) => 0.1 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
                 PowerList.Add(thread, power);
             }
