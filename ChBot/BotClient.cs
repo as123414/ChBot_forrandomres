@@ -266,7 +266,7 @@ namespace ChBot
                         // リトライ回数が上限を超えたらUSBを再起動してリトライ回数をリセットして再度試す
                         Attempt = 0;
                         hasLastChance = false;
-                        try { await Network.SendLineMessage("エラーのためコマンドを試行します"); } catch { }
+                        try { await Network.SendLineMessage("エラーのためコマンドを試行します\n" + _er.Message); } catch { }
                         ReportProgress("RESTART_USB_STARTED");
                         try
                         {
@@ -280,7 +280,7 @@ namespace ChBot
                     }
                     else if (UnixTime.Now() - Properties.Settings.Default.LastRetry > 120)
                     {
-                        try { await Network.SendLineMessage("エラーのため再起動します"); } catch { }
+                        try { await Network.SendLineMessage("エラーのため再起動します\n" + _er.Message); } catch { }
                         ui.manager.restartFlag = true;
                         waitingReboot = true;
                         return 0;
