@@ -389,7 +389,6 @@ namespace ChBot
             Text = InstanceName + (context.Loginer.Logining ? " - ログイン中" : "");
             splitContainer1.Enabled = !context.Loginer.Logining;
             MessageTextBox.Text = context.Message;
-            BoardTextBox.Text = context.Board;
             MailTextBox.Text = context.Mail;
             NameTextBox.Text = context.Name;
             IntervalNumericUpDown.Value = context.Interval;
@@ -477,32 +476,6 @@ namespace ChBot
             }
         }
 
-        private async Task<string[]> getRandomReses(int num)
-        {
-            BotThreadList all = await Network.GetThreadList(context.Board);
-            List<string> list = new List<string>();
-            Random r = new Random((int)(DateTime.Now.ToFileTime() % int.MaxValue));
-            while (list.Count < num)
-            {
-                string[] dat = await Network.GetResList(all[r.Next(all.Count)], context.ApiSid);
-                if (dat.Length >= 3)
-                {
-                    string res = dat[r.Next(1, dat.Length)];
-                    if (res.Length <= 50)
-                    {
-                        Regex r1 = new Regex(@">>\d+");
-                        Regex r2 = new Regex(@"\n");
-                        Regex r3 = new Regex(@"http");
-                        if (!(r1.IsMatch(res) || r2.IsMatch(res) || r3.IsMatch(res)))
-                        {
-                            list.Add(res);
-                        }
-                    }
-                }
-            }
-            return list.ToArray();
-        }
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (disableEvents)
@@ -538,15 +511,6 @@ namespace ChBot
                 return;
 
             context.Message = MessageTextBox.Text;
-        }
-
-        private void BoardTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (disableEvents)
-                return;
-
-            context.Board = BoardTextBox.Text;
-            UpdateUI(UIParts.Other);
         }
 
         private void NameTextBox_TextChanged(object sender, EventArgs e)

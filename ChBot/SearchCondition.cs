@@ -33,6 +33,7 @@ namespace ChBot
         public string Trip { get; set; }
         public int NeedMatchCount { get; set; }
         public bool Enabled { get; set; }
+        public string Board { get; set; }
 
         public long lastHissiLoadTime;
         public BotThreadList hissiThreads;
@@ -61,6 +62,7 @@ namespace ChBot
             lastHissiLoadTime = 0;
             NeedMatchCount = 1;
             Enabled = true;
+            Board = "https://mi.5ch.net/news4vip/";
         }
 
         public bool IsMatchLiteCondition(BotThread thread)
@@ -71,6 +73,7 @@ namespace ChBot
             if (SearchMode == SearchModes.Word)
             {
                 return (IsMatchTitleWord(thread)
+                    && "https://" + thread.Server + "/" + thread.Bbs + "/" == Board
                     && thread.Res >= MinRes
                     && thread.Res <= MaxRes
                     && UnixTime.Now() - thread.Key >= MinTime
@@ -192,7 +195,8 @@ namespace ChBot
                 EverMatch,
                 Trip,
                 NeedMatchCount,
-                Enabled
+                Enabled,
+                Board
             };
         }
 
@@ -220,6 +224,7 @@ namespace ChBot
                 Trip = settings.GetProperty("Trip").GetString();
                 NeedMatchCount = settings.GetProperty("NeedMatchCount").GetInt32();
                 Enabled = settings.GetProperty("Enabled").GetBoolean();
+                Board = settings.GetProperty("Board").GetString();
             }
             catch { }
         }

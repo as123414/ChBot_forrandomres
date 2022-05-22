@@ -22,7 +22,6 @@ namespace ChBot
 
         public BotThreadContext ThreadContext { get; set; }
 
-        public string Board { get; set; }
         public string Message { get; set; }
         public string Mail { get; set; }
         public string Name { get; set; }
@@ -194,7 +193,6 @@ namespace ChBot
         //デフォルトプロファイルの復元
         private void ResetSettings()
         {
-            Board = "https://mi.5ch.net/news4vip/";
             Message = "てす";
             Mail = "";
             Name = "";
@@ -317,10 +315,26 @@ namespace ChBot
             Message = await Generator.getResString(Generator.Kinds.AsciiKanji, this);
         }
 
+        public async Task<BotThreadList> GetAllThreadList()
+        {
+            var boards = new List<string>();
+            foreach (var searchCondition in SearchConditions)
+            {
+                if (!boards.Contains(searchCondition.Board))
+                    boards.Add(searchCondition.Board);
+            }
+
+            var allThreads = new BotThreadList();
+            foreach (var board in boards)
+                allThreads.AddRange(await Network.GetThreadList(board));
+
+            return allThreads;
+        }
+
         //スレッド検索
         public async Task SearchThread()
         {
-            var allThreads = await Network.GetThreadList(Board);
+            var allThreads = await GetAllThreadList();
             var searchResult = allThreads.Where(thread => everMatchList.Contains(thread) || SearchConditions.Where(condition => condition.Enabled).Any(condition => condition.IsMatchLiteCondition(thread))).ToBotThreadList();
             searchResult.Sort();
             ThreadContext.ClearEnabled();
@@ -331,7 +345,7 @@ namespace ChBot
 
         public async Task MiddleSearchThread()
         {
-            var allThreads = await Network.GetThreadList(Board);
+            var allThreads = await GetAllThreadList();
             var searchResult = new BotThreadList();
             for (var i = 0; i < allThreads.Count; i++)
             {
@@ -364,7 +378,7 @@ namespace ChBot
 
         public async Task FullSearchThread(Action<int, int> report = null)
         {
-            var allThreads = await Network.GetThreadList(Board);
+            var allThreads = await GetAllThreadList();
             var searchResult = new BotThreadList();
             var threads = new BotThreadList();
             for (var i = 0; i < allThreads.Count; i++)
@@ -423,7 +437,6 @@ namespace ChBot
             var settings = new
             {
                 Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-                Board,
                 Message,
                 Mail,
                 Name,
@@ -460,7 +473,6 @@ namespace ChBot
                 var jsonstr = File.ReadAllText("profile.json");
                 var settings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonstr);
 
-                Board = settings["Board"].GetString();
                 Message = settings["Message"].GetString();
                 Mail = settings["Mail"].GetString();
                 Name = settings["Name"].GetString();
@@ -484,7 +496,6 @@ namespace ChBot
         {
             return new
             {
-                Board,
                 Message,
                 Mail,
                 Name,
@@ -522,7 +533,6 @@ namespace ChBot
         {
             try
             {
-                Board = state.GetProperty("Board").GetString();
                 Message = state.GetProperty("Message").GetString();
                 Mail = state.GetProperty("Mail").GetString();
                 Name = state.GetProperty("Name").GetString();

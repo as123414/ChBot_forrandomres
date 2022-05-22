@@ -169,6 +169,7 @@ namespace ChBot
             TripTextBox.Text = selectedSearchCondition.Trip;
             EverMatchCheckBox.Checked = selectedSearchCondition.EverMatch;
             NeedMatchCountNumericUpDown.Value = selectedSearchCondition.NeedMatchCount;
+            textBox1.Text = selectedSearchCondition.Board;
 
             ApplySearchModeRadioButtton();
 
@@ -414,6 +415,15 @@ namespace ChBot
                 return;
 
             ((SearchCondition)listView1.Items[e.Index].Tag).Enabled = e.NewValue == CheckState.Checked;
+            ListUpSearchConditions();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (disableEvents)
+                return;
+
+            selectedSearchCondition.Board = textBox1.Text;
             ListUpSearchConditions();
         }
     }

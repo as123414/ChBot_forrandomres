@@ -80,6 +80,8 @@ namespace ChBot
             this.label13 = new System.Windows.Forms.Label();
             this.NeedMatchCountNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.label14 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.WordFormPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.KeyRemNumericUpDown)).BeginInit();
@@ -690,11 +692,30 @@ namespace ChBot
             this.label14.TabIndex = 123;
             this.label14.Text = "必要マッチ数";
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(558, 249);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(230, 19);
+            this.textBox1.TabIndex = 130;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(558, 234);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(17, 12);
+            this.label15.TabIndex = 131;
+            this.label15.Text = "板";
+            // 
             // SearchConditionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 463);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.NeedMatchCountNumericUpDown);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.TripTextBox);
@@ -800,5 +821,7 @@ namespace ChBot
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.NumericUpDown NeedMatchCountNumericUpDown;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label15;
     }
 }

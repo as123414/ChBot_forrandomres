@@ -48,12 +48,10 @@
             this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripMenuItem();
             this.ClearIgnoredButton = new System.Windows.Forms.Button();
             this.ClearEnabledButton = new System.Windows.Forms.Button();
-            this.BoardTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.MailTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.NameTextBox = new System.Windows.Forms.TextBox();
             this.UserNameTextBox = new System.Windows.Forms.TextBox();
@@ -80,6 +78,7 @@
             this.splitContainer5 = new System.Windows.Forms.SplitContainer();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.panel6 = new System.Windows.Forms.Panel();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button13 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -111,7 +110,6 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SelectDBFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.IntervalNumericUpDown)).BeginInit();
             this.ThreadLlistContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -151,7 +149,7 @@
             this.MessageTextBox.Multiline = true;
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.MessageTextBox.Size = new System.Drawing.Size(222, 243);
+            this.MessageTextBox.Size = new System.Drawing.Size(222, 244);
             this.MessageTextBox.TabIndex = 0;
             this.MessageTextBox.WordWrap = false;
             this.MessageTextBox.TextChanged += new System.EventHandler(this.MessageTextBox_TextChanged);
@@ -177,7 +175,7 @@
             this.ResultWebBrowser.Name = "ResultWebBrowser";
             this.ResultWebBrowser.ScriptErrorsSuppressed = true;
             this.ResultWebBrowser.ScrollBarsEnabled = false;
-            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 241);
+            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 242);
             this.ResultWebBrowser.TabIndex = 3;
             // 
             // IntervalNumericUpDown
@@ -210,7 +208,7 @@
             this.ThreadListListView.Margin = new System.Windows.Forms.Padding(2);
             this.ThreadListListView.Name = "ThreadListListView";
             this.ThreadListListView.ShowItemToolTips = true;
-            this.ThreadListListView.Size = new System.Drawing.Size(391, 243);
+            this.ThreadListListView.Size = new System.Drawing.Size(391, 244);
             this.ThreadListListView.TabIndex = 14;
             this.toolTip1.SetToolTip(this.ThreadListListView, "赤 - 有効\r\n黄 - 現在の書き込み対象\r\n灰 - 無視されます");
             this.ThreadListListView.UseCompatibleStateImageBehavior = false;
@@ -340,15 +338,6 @@
             this.ClearEnabledButton.UseVisualStyleBackColor = true;
             this.ClearEnabledButton.Click += new System.EventHandler(this.ClearEnabledButton_Click);
             // 
-            // BoardTextBox
-            // 
-            this.BoardTextBox.Location = new System.Drawing.Point(597, 82);
-            this.BoardTextBox.Margin = new System.Windows.Forms.Padding(2);
-            this.BoardTextBox.Name = "BoardTextBox";
-            this.BoardTextBox.Size = new System.Drawing.Size(258, 19);
-            this.BoardTextBox.TabIndex = 18;
-            this.BoardTextBox.TextChanged += new System.EventHandler(this.BoardTextBox_TextChanged);
-            // 
             // label6
             // 
             this.label6.AutoSize = true;
@@ -388,16 +377,6 @@
             this.label11.Size = new System.Drawing.Size(33, 12);
             this.label11.TabIndex = 32;
             this.label11.Text = "メール";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(576, 85);
-            this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(17, 12);
-            this.label12.TabIndex = 33;
-            this.label12.Text = "板";
             // 
             // label13
             // 
@@ -581,7 +560,7 @@
             // 
             this.splitContainer6.Panel2.Controls.Add(this.panel2);
             this.splitContainer6.Size = new System.Drawing.Size(855, 65);
-            this.splitContainer6.SplitterDistance = 502;
+            this.splitContainer6.SplitterDistance = 503;
             this.splitContainer6.SplitterWidth = 3;
             this.splitContainer6.TabIndex = 52;
             // 
@@ -608,7 +587,7 @@
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(2);
-            this.panel2.Size = new System.Drawing.Size(350, 65);
+            this.panel2.Size = new System.Drawing.Size(349, 65);
             this.panel2.TabIndex = 13;
             // 
             // button18
@@ -677,10 +656,8 @@
             this.splitContainer2.Panel2.Controls.Add(this.button9);
             this.splitContainer2.Panel2.Controls.Add(this.button8);
             this.splitContainer2.Panel2.Controls.Add(this.button7);
-            this.splitContainer2.Panel2.Controls.Add(this.BoardTextBox);
             this.splitContainer2.Panel2.Controls.Add(this.MailTextBox);
             this.splitContainer2.Panel2.Controls.Add(this.label11);
-            this.splitContainer2.Panel2.Controls.Add(this.label12);
             this.splitContainer2.Panel2.Controls.Add(this.StartStopButton);
             this.splitContainer2.Panel2.Controls.Add(this.label13);
             this.splitContainer2.Panel2.Controls.Add(this.NameTextBox);
@@ -695,7 +672,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.LoginButton);
             this.splitContainer2.Panel2.Padding = new System.Windows.Forms.Padding(2);
             this.splitContainer2.Size = new System.Drawing.Size(855, 536);
-            this.splitContainer2.SplitterDistance = 243;
+            this.splitContainer2.SplitterDistance = 244;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 15;
             // 
@@ -714,7 +691,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(855, 243);
+            this.splitContainer3.Size = new System.Drawing.Size(855, 244);
             this.splitContainer3.SplitterDistance = 222;
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
@@ -733,7 +710,7 @@
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.MessageTextBox);
-            this.splitContainer5.Size = new System.Drawing.Size(222, 243);
+            this.splitContainer5.Size = new System.Drawing.Size(222, 244);
             this.splitContainer5.SplitterDistance = 25;
             this.splitContainer5.SplitterWidth = 3;
             this.splitContainer5.TabIndex = 1;
@@ -753,7 +730,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.ThreadListListView);
-            this.splitContainer4.Size = new System.Drawing.Size(630, 243);
+            this.splitContainer4.Size = new System.Drawing.Size(630, 244);
             this.splitContainer4.SplitterDistance = 236;
             this.splitContainer4.SplitterWidth = 3;
             this.splitContainer4.TabIndex = 0;
@@ -766,8 +743,19 @@
             this.panel6.Location = new System.Drawing.Point(0, 0);
             this.panel6.Margin = new System.Windows.Forms.Padding(2);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(236, 243);
+            this.panel6.Size = new System.Drawing.Size(236, 244);
             this.panel6.TabIndex = 4;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(93, 151);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(90, 16);
+            this.checkBox1.TabIndex = 127;
+            this.checkBox1.Text = "スレ重複許可";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // button13
             // 
@@ -1103,17 +1091,6 @@
             this.timer1.Interval = 43200000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(93, 151);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(90, 16);
-            this.checkBox1.TabIndex = 127;
-            this.checkBox1.Text = "スレ重複許可";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
             // BotInstance
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1175,7 +1152,6 @@
         public System.Windows.Forms.ColumnHeader columnHeader2;
         public System.Windows.Forms.Button ClearIgnoredButton;
         public System.Windows.Forms.Button ClearEnabledButton;
-        public System.Windows.Forms.TextBox BoardTextBox;
         public System.Windows.Forms.Label label6;
         public System.Windows.Forms.Label label7;
         public System.Windows.Forms.ContextMenuStrip ThreadLlistContextMenuStrip;
@@ -1184,7 +1160,6 @@
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         public System.Windows.Forms.Label label11;
-        public System.Windows.Forms.Label label12;
         public System.Windows.Forms.Label label13;
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
