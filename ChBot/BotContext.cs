@@ -247,7 +247,7 @@ namespace ChBot
             searchTimer.Enabled = false;
         }
 
-        public async Task GatherMonaKey()
+        public async Task GatherMonaKey(BotThread thread)
         {
             UAMonaKeyPairs = new List<BotUAMonaKeyPair>();
             for (var i = 0; i < 100; i++)
@@ -256,7 +256,8 @@ namespace ChBot
                     await Network.ChangeIP(0);
 
                 var ua = Network.GetRandomUseragent(BotUA.ChMate);
-                var mona = await Network.GetMonaKey(ua, 0);
+                var mona = await Network.GetMonaKey(ua, 0, thread);
+                ui.textBox1.AppendText("[" + (i + 1) + "/100] " + mona + "\r\n");
                 /*var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
                 try
                 {
@@ -269,7 +270,7 @@ namespace ChBot
             }
         }
 
-        public async Task FillMonaKey()
+        public async Task FillMonaKey(BotThread thread)
         {
             UAMonaKeyPairs = UAMonaKeyPairs.Where(p => p.Used).ToList();
             var addNum = 100 - UAMonaKeyPairs.Count;
@@ -280,7 +281,8 @@ namespace ChBot
                     await Network.ChangeIP(0);
 
                 var ua = Network.GetRandomUseragent(BotUA.ChMate);
-                var mona = await Network.GetMonaKey(ua, 0);
+                var mona = await Network.GetMonaKey(ua, 0, thread);
+                ui.textBox1.AppendText("[" + (i + 1) + "/" + addNum + "] " + mona + "\r\n");
                 /*var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
                 try
                 {

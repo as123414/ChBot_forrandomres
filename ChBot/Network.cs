@@ -104,9 +104,8 @@ namespace ChBot
             return apiSid;
         }
 
-        public static async Task<string> GetMonaKey(string userAgent, int deviceIndex)
+        public static async Task<string> GetMonaKey(string userAgent, int deviceIndex, BotThread thread)
         {
-            var thread = new BotThread(1509713280, "", "mi.5ch.net", "news4vip");
             try
             {
                 await Post(thread, "test", "", "", new BotUAMonaKeyPair(userAgent, "00000000-0000-0000-0000-000000000000", false), deviceIndex);

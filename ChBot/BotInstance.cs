@@ -803,10 +803,15 @@ namespace ChBot
 
             try
             {
-                var UA = Network.GetRandomUseragent(BotUA.ChMate);
-                var Mona = await Network.GetMonaKey(UA, comboBox1.SelectedIndex - 1);
-                context.UAMonaKeyPair = new BotUAMonaKeyPair(UA, Mona, false);
-                MessageBox.Show(UA + "\n" + Mona);
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                {
+                    var UA = Network.GetRandomUseragent(BotUA.ChMate);
+                    var Mona = await Network.GetMonaKey(UA, comboBox1.SelectedIndex - 1, thread);
+                    context.UAMonaKeyPair = new BotUAMonaKeyPair(UA, Mona, false);
+                    MessageBox.Show(UA + "\n" + Mona);
+                }
             }
             catch (Exception er)
             {
@@ -824,8 +829,13 @@ namespace ChBot
 
             try
             {
-                await context.GatherMonaKey();
-                MessageBox.Show(context.UAMonaKeyPairs.Count + "個取得");
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                {
+                    await context.GatherMonaKey(thread);
+                    MessageBox.Show(context.UAMonaKeyPairs.Count + "個取得");
+                }
             }
             catch (Exception er)
             {
@@ -880,8 +890,13 @@ namespace ChBot
 
             try
             {
-                await context.FillMonaKey();
-                MessageBox.Show("計" + context.UAMonaKeyPairs.Count + "個");
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                {
+                    await context.FillMonaKey(thread);
+                    MessageBox.Show("計" + context.UAMonaKeyPairs.Count + "個");
+                }
             }
             catch (Exception er)
             {

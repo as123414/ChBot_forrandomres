@@ -414,7 +414,6 @@ namespace ChBot
                 }
 
                 var commands = new string[]{
-                    "GATHER_MONA",
                     "START",
                     "STOP",
                     "CAPTURE",
@@ -424,12 +423,6 @@ namespace ChBot
 
                 switch (Regex.IsMatch(msg, @"^\d+$") ? (int.Parse(msg) >= 0 && int.Parse(msg) < commands.Length ? commands[int.Parse(msg)] : msg.ToUpper()) : msg.ToUpper())
                 {
-                    case "GATHER_MONA":
-                        await Network.SendLineMessage("RECIEVED.");
-                        foreach (var instance in instanceList)
-                            await instance.context.GatherMonaKey();
-                        await Network.SendLineMessage("DONE.");
-                        break;
                     case "START":
                         await Network.SendLineMessage("RECIEVED.");
                         foreach (var instance in instanceList)
