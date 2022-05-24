@@ -171,16 +171,17 @@ namespace ChBot
 
         private async Task SetPower()
         {
-            PowerList = new Dictionary<BotThread, double>();
+            var newPowerList = new Dictionary<BotThread, double>();
             var enabledList = ThreadContext.GetEnabled().Where(thread => !ThreadContext.IsIgnoredContains(thread)).ToBotThreadList();
             foreach (var thread in enabledList)
             {
                 if (thread.MatchedSearchCondition != null)
                 {
                     var power = await thread.MatchedSearchCondition.GetPower(this, thread);
-                    PowerList.Add(thread, power);
+                    newPowerList.Add(thread, power);
                 }
             }
+            PowerList = newPowerList;
         }
 
         private void WriteLog(string text)
