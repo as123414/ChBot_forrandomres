@@ -18,6 +18,7 @@ namespace ChBot
         public long Wrote;
         public bool Priority;
         public List<Dictionary<string, string>> ResListCache;
+        public SearchCondition MatchedSearchCondition;
 
         //コンストラクタ
         public BotThread(long time, string title, string server, string bbs)
@@ -31,6 +32,7 @@ namespace ChBot
             Wrote = 0;
             Priority = false;
             ResListCache = null;
+            MatchedSearchCondition = null;
         }
 
         //スレッドURLを解析
@@ -64,7 +66,8 @@ namespace ChBot
                 Rank = Rank,
                 Wrote = Wrote,
                 Priority = Priority,
-                ResListCache = ResListCache
+                ResListCache = ResListCache,
+                MatchedSearchCondition = MatchedSearchCondition
             };
         }
 

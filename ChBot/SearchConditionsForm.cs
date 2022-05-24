@@ -21,6 +21,10 @@ namespace ChBot
             disableEvents = true;
             this.context = context;
             InitializeComponent();
+            comboBox2.Items.AddRange(Enum.GetValues(typeof(SearchCondition.NameGenerateModes)).Cast<object>().ToArray());
+            comboBox2.SelectedIndex = 0;
+            comboBox1.Items.AddRange(Enum.GetValues(typeof(SearchCondition.PowerSetModes)).Cast<object>().ToArray());
+            comboBox1.SelectedIndex = 0;
         }
 
         private void SearchConditionsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -170,6 +174,9 @@ namespace ChBot
             EverMatchCheckBox.Checked = selectedSearchCondition.EverMatch;
             NeedMatchCountNumericUpDown.Value = selectedSearchCondition.NeedMatchCount;
             textBox1.Text = selectedSearchCondition.Board;
+            textBox2.Text = selectedSearchCondition.AvoidMatsubi.ToString();
+            comboBox2.SelectedIndex = (int)selectedSearchCondition.NameGenerateMode;
+            comboBox1.SelectedIndex = (int)selectedSearchCondition.PowerSetMode;
 
             ApplySearchModeRadioButtton();
 
@@ -425,6 +432,35 @@ namespace ChBot
 
             selectedSearchCondition.Board = textBox1.Text;
             ListUpSearchConditions();
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            if (disableEvents)
+                return;
+
+            if (textBox2.Text.Length == 0)
+                selectedSearchCondition.AvoidMatsubi = 'a';
+            else
+                selectedSearchCondition.AvoidMatsubi = textBox2.Text[0];
+
+            ListUpSearchConditions();
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (disableEvents)
+                return;
+
+            selectedSearchCondition.NameGenerateMode = (SearchCondition.NameGenerateModes)comboBox2.SelectedIndex;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (disableEvents)
+                return;
+
+            selectedSearchCondition.PowerSetMode = (SearchCondition.PowerSetModes)comboBox1.SelectedIndex;
         }
     }
 }

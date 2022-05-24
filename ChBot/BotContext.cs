@@ -175,13 +175,11 @@ namespace ChBot
             var enabledList = ThreadContext.GetEnabled().Where(thread => !ThreadContext.IsIgnoredContains(thread)).ToBotThreadList();
             foreach (var thread in enabledList)
             {
-                if (thread.ResListCache == null)
-                    thread.ResListCache = Network.DatToDetailResList(await Network.GetDat(thread, ApiSid));
-                var anchorResList = thread.ResListCache.Where(res => Regex.IsMatch(res["Message"], @">>\d+.*[^\d\.\-\s>]", RegexOptions.Singleline));
-                var power = anchorResList.Aggregate(0.0, (p, res) => 1.0 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
-                var ageResList = thread.ResListCache.Where(res => res["Mail"] != "sage");
-                power += ageResList.Aggregate(0.0, (p, res) => 0.1 / (thread.ResListCache.Count + 1 - int.Parse(res["No"])) + p);
-                PowerList.Add(thread, power);
+                if (thread.MatchedSearchCondition != null)
+                {
+                    var power = await thread.MatchedSearchCondition.GetPower(this, thread);
+                    PowerList.Add(thread, power);
+                }
             }
         }
 
@@ -310,9 +308,20 @@ namespace ChBot
         }
 
         //メッセージ欄にランダム文字列をセット
-        public async Task SetNewMessage()
+        public async Task SetNewMessage(BotThread thread)
         {
-            Message = await Generator.getResString(Generator.Kinds.AsciiKanji, this);
+            if (thread.MatchedSearchCondition == null)
+                Message = "";
+            else
+                Message = await thread.MatchedSearchCondition.GetMessage(this, thread);
+        }
+
+        public void SetNewName(BotThread thread)
+        {
+            if (thread.MatchedSearchCondition == null)
+                Name = "";
+            else
+                Name = thread.MatchedSearchCondition.GetName(this, thread);
         }
 
         public async Task<BotThreadList> GetAllThreadList()
@@ -335,7 +344,30 @@ namespace ChBot
         public async Task SearchThread()
         {
             var allThreads = await GetAllThreadList();
-            var searchResult = allThreads.Where(thread => everMatchList.Contains(thread) || SearchConditions.Where(condition => condition.Enabled).Any(condition => condition.IsMatchLiteCondition(thread))).ToBotThreadList();
+            var searchResult = new BotThreadList();
+            foreach (var thread in allThreads)
+            {
+                if (everMatchList.Contains(thread))
+                {
+                    var existThread = everMatchList.FirstOrDefault(t => t.Equals(thread));
+                    existThread.ResListCache = null;
+                    searchResult.Add(existThread);
+                    continue;
+                }
+
+                foreach (var condition in SearchConditions)
+                {
+                    if (!condition.Enabled)
+                        continue;
+
+                    if (condition.IsMatchLiteCondition(thread))
+                    {
+                        thread.MatchedSearchCondition = condition;
+                        searchResult.Add(thread);
+                        break;
+                    }
+                }
+            }
             searchResult.Sort();
             ThreadContext.ClearEnabled();
             ThreadContext.AddEnabled(searchResult);
@@ -347,25 +379,26 @@ namespace ChBot
         {
             var allThreads = await GetAllThreadList();
             var searchResult = new BotThreadList();
-            for (var i = 0; i < allThreads.Count; i++)
+            foreach (var thread in allThreads)
             {
-                var thread = allThreads[i];
                 if (everMatchList.Contains(thread))
                 {
-                    searchResult.Add(thread);
+                    var existThread = everMatchList.FirstOrDefault(t => t.Equals(thread));
+                    existThread.ResListCache = null;
+                    searchResult.Add(existThread);
+                    continue;
                 }
-                else
-                {
-                    foreach (var condition in SearchConditions)
-                    {
-                        if (!condition.Enabled)
-                            continue;
 
-                        if (await condition.IsMatchMiddleCondition(thread))
-                        {
-                            searchResult.Add(thread);
-                            break;
-                        }
+                foreach (var condition in SearchConditions)
+                {
+                    if (!condition.Enabled)
+                        continue;
+
+                    if (await condition.IsMatchMiddleCondition(thread))
+                    {
+                        thread.MatchedSearchCondition = condition;
+                        searchResult.Add(thread);
+                        break;
                     }
                 }
             }
@@ -381,25 +414,25 @@ namespace ChBot
             var allThreads = await GetAllThreadList();
             var searchResult = new BotThreadList();
             var threads = new BotThreadList();
-            for (var i = 0; i < allThreads.Count; i++)
+            foreach (var thread in allThreads)
             {
-                var thread = allThreads[i];
                 if (everMatchList.Contains(thread))
                 {
-                    searchResult.Add(thread);
+                    var existThread = everMatchList.FirstOrDefault(t => t.Equals(thread));
+                    existThread.ResListCache = null;
+                    searchResult.Add(existThread);
+                    continue;
                 }
-                else
-                {
-                    foreach (var condition in SearchConditions)
-                    {
-                        if (!condition.Enabled)
-                            continue;
 
-                        if (await condition.IsMatchMiddleCondition(thread))
-                        {
-                            threads.Add(thread);
-                            break;
-                        }
+                foreach (var condition in SearchConditions)
+                {
+                    if (!condition.Enabled)
+                        continue;
+
+                    if (await condition.IsMatchMiddleCondition(thread))
+                    {
+                        threads.Add(thread);
+                        break;
                     }
                 }
             }
@@ -414,6 +447,7 @@ namespace ChBot
 
                     if (await condition.IsMatchFullCondition(thread, ApiSid))
                     {
+                        thread.MatchedSearchCondition = condition;
                         searchResult.Add(thread);
                         if (condition.EverMatch)
                             everMatchList.Add(thread);

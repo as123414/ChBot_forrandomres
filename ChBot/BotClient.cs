@@ -205,8 +205,10 @@ namespace ChBot
                 for (var i = 0; i < 3; i++)
                 {
                     ReportProgress("GENERATE_MESSAGE_STARTED");
-                    await context.SetNewMessage();
+                    await context.SetNewMessage(current);
                     ReportProgress("GENERATE_MESSAGE_COMPLETED");
+
+                    context.SetNewName(current);
 
                     if (context.Message == string.Empty)
                     {

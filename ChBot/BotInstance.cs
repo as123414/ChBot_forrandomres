@@ -652,9 +652,13 @@ namespace ChBot
         private async void button11_Click(object sender, EventArgs e)
         {
             button11.Enabled = false;
+
             try
             {
-                await context.SetNewMessage();
+                BotThread thread = GetSelectedThreads().First;
+
+                if (thread != null)
+                    await context.SetNewMessage(thread);
             }
             catch (Exception er)
             {
