@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -60,6 +62,7 @@ namespace ChBot
         public bool waitingReboot = false;
         public bool pausing = false;
         public long pauseStartTime = 0;
+        public Dictionary<string, string> tripKeyDict = new Dictionary<string, string>();
 
         public BotContext(BotInstance ui)
         {
@@ -77,6 +80,17 @@ namespace ChBot
             searchTimer.Tick += SearchTimer_Tick;
             ResetSettings();
             ClientList = new List<BotClient>() { new BotClient(ui, this, 0) };
+
+            SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider();
+            for (var i = 0; i < 200; i++)
+            {
+                var tripKey = "OKDWnoqsdfw" + i;
+                var source = Encoding.GetEncoding("Shift-JIS").GetBytes(tripKey);
+                var result = sha1.ComputeHash(source);
+                var digest = Convert.ToBase64String(result);
+                var trip = digest.Substring(0, 12).Replace('+', '.');
+                tripKeyDict.Add(tripKey, trip);
+            }
         }
 
         private async void SearchTimer_Tick(object sender, EventArgs e)
