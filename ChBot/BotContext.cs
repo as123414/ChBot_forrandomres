@@ -229,6 +229,7 @@ namespace ChBot
             if (SearchWorking)
                 return;
 
+            waitingReboot = false;
             searchAttempt = 0;
             SearchCount = 0;
             SearchWorking = true;

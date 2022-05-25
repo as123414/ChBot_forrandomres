@@ -54,6 +54,7 @@ namespace ChBot
             if (Working)
                 return;
 
+            waitingReboot = false;
             Attempt = 0;
             hasLastChance = true;
             PostCount = context.Interval;
