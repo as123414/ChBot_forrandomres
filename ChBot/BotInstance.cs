@@ -809,7 +809,7 @@ namespace ChBot
                 {
                     var UA = Network.GetRandomUseragent(BotUA.ChMate);
                     var Mona = await Network.GetMonaKey(UA, comboBox1.SelectedIndex - 1, thread);
-                    context.UAMonaKeyPair = new BotUAMonaKeyPair(UA, Mona, false);
+                    context.UAMonaKeyPair = new BotUAMonaKeyPair(UA, Mona, false, true);
                     MessageBox.Show(UA + "\n" + Mona);
                 }
             }

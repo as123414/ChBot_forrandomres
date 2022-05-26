@@ -280,7 +280,7 @@ namespace ChBot
                     await Network.Post(thread, "test", "", "", ua, mona);
                 }
                 catch (PostFailureException) { }*/
-                var pair = new BotUAMonaKeyPair(ua, mona, false);
+                var pair = new BotUAMonaKeyPair(ua, mona, false, true);
                 UAMonaKeyPairs.Add(pair);
                 Console.WriteLine("[" + (i + 1) + "/100] " + ua + "," + mona);
             }
@@ -288,7 +288,7 @@ namespace ChBot
 
         public async Task FillMonaKey(BotThread thread)
         {
-            UAMonaKeyPairs = UAMonaKeyPairs.Where(p => p.Used).ToList();
+            UAMonaKeyPairs = UAMonaKeyPairs.Where(p => p.Used && p.IsValid).ToList();
             var addNum = 100 - UAMonaKeyPairs.Count;
             var newUAMonaKeyPairs = new List<BotUAMonaKeyPair>();
             for (var i = 0; i < addNum; i++)
@@ -305,7 +305,7 @@ namespace ChBot
                     await Network.Post(thread, "test", "", "", ua, mona);
                 }
                 catch (PostFailureException) { }*/
-                var pair = new BotUAMonaKeyPair(ua, mona, false);
+                var pair = new BotUAMonaKeyPair(ua, mona, false, true);
                 newUAMonaKeyPairs.Insert(0, pair);
                 Console.WriteLine("[" + (i + 1) + "/" + addNum + "] " + ua + "," + mona);
             }
@@ -318,10 +318,19 @@ namespace ChBot
                 throw new Exception("モナキーが0個です");
             lock (UAMonaKeyPairs)
             {
-                var pair = UAMonaKeyPairs[0];
-                UAMonaKeyPairs.Remove(pair);
-                UAMonaKeyPairs.Add(pair);
-                UAMonaKeyPair = pair;
+                var validUAKey = UAMonaKeyPairs[0];
+                for (var i = 0; i < UAMonaKeyPairs.Count; i++)
+                {
+                    var pair = UAMonaKeyPairs[0];
+                    UAMonaKeyPairs.Remove(pair);
+                    UAMonaKeyPairs.Add(pair);
+                    if (pair.IsValid)
+                    {
+                        validUAKey = pair;
+                        break;
+                    }
+                }
+                UAMonaKeyPair = validUAKey;
             }
         }
 
@@ -575,7 +584,7 @@ namespace ChBot
                     LocationY = client.Location.Y,
                     deviceIndex = client.DeviceIndex
                 }),
-                UAMonaKeyPairs = UAMonaKeyPairs.Select(pair => pair.UA + "," + pair.MonaKey + "," + (pair.Used ? "1" : "0")),
+                UAMonaKeyPairs = UAMonaKeyPairs.Select(pair => pair.UA + "," + pair.MonaKey + "," + (pair.Used ? "1" : "0") + "," + (pair.IsValid ? "1" : "0")),
                 SearchWorking
             };
         }
@@ -629,7 +638,8 @@ namespace ChBot
                     var ua = recode.Split(',')[0];
                     var mona = recode.Split(',')[1];
                     var used = recode.Split(',')[2];
-                    return new BotUAMonaKeyPair(ua, mona, used == "1");
+                    var isValid = recode.Split(',')[3];
+                    return new BotUAMonaKeyPair(ua, mona, used == "1", isValid == "1");
                 }).ToList();
 
                 var counter = 0;

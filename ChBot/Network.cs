@@ -109,7 +109,7 @@ namespace ChBot
         {
             try
             {
-                await Post(thread, "test", "", "", new BotUAMonaKeyPair(userAgent, "00000000-0000-0000-0000-000000000000", false), deviceIndex);
+                await Post(thread, "test", "", "", new BotUAMonaKeyPair(userAgent, "00000000-0000-0000-0000-000000000000", false, true), deviceIndex);
             }
             catch (SigFailureException er)
             {
@@ -385,9 +385,15 @@ namespace ChBot
             if (html.IndexOf("<title>書きこみました") == -1)
             {
                 if (body.Contains("<form"))
+                {
                     throw new SigFailureException(body, mona[0]);
+                }
                 else
+                {
+                    if (body.Contains("ERROR: 鍵が無効です。</b></font>"))
+                        uaMonaKeyPair.IsValid = false;
                     throw new PostFailureException(body);
+                }
             }
 
             uaMonaKeyPair.Used = true;
@@ -1152,12 +1158,14 @@ namespace ChBot
         public string UA { get; set; }
         public string MonaKey { get; set; }
         public bool Used { get; set; }
+        public bool IsValid { get; set; }
 
-        public BotUAMonaKeyPair(string UA, string MonaKey, bool Used)
+        public BotUAMonaKeyPair(string UA, string MonaKey, bool Used, bool IsValid)
         {
             this.UA = UA;
             this.MonaKey = MonaKey;
             this.Used = Used;
+            this.IsValid = IsValid;
         }
     }
 }
