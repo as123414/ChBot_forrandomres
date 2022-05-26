@@ -744,7 +744,7 @@ namespace ChBot
             button12.Enabled = false;
             try
             {
-                await Network.SendLineMessage("test");
+                await Network.SendMessage("test");
             }
             catch (Exception er)
             {
@@ -759,7 +759,7 @@ namespace ChBot
             button14.Enabled = false;
             try
             {
-                MessageBox.Show(await Network.GetLineMessage());
+                MessageBox.Show(await Network.GetMessage());
             }
             catch (Exception er)
             {

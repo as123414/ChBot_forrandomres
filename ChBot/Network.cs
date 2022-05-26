@@ -27,6 +27,8 @@ namespace ChBot
         private static string ReadAppKey = "8yoeAcaLXiEY1FjEuJBKgkPxirkDqn";
         private static string ReadHMKey = "F7vFmWCGd5Gzs8hc03NpRvw4bPwMz3";
         private static string lineAuth = "";
+        private static string discordAuth = "";
+        private static string discordRoom = "";
         private static string imgUploadServer = "";
         private static string lineRecieveWebhookUrl = "";
         private static string ipGetUrl = "";
@@ -42,12 +44,11 @@ namespace ChBot
         public static void LoadConfig()
         {
             var lines = File.ReadAllLines(@"config.txt");
-            lineAuth = lines[0].Trim();
-            imgUploadServer = lines[1].Trim();
-            lineRecieveWebhookUrl = lines[2].Trim();
-            ipGetUrl = lines[3].Trim();
-            DeviceIDList.AddRange(lines[4].Trim().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()));
-            postIPEndPointList.AddRange(lines[5].Trim().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => new IPEndPoint(new IPAddress(s.Trim().Split('.').Select(ss => byte.Parse(ss)).ToArray()), 0)));
+            discordAuth = lines[0].Trim();
+            discordRoom = lines[1].Trim();
+            ipGetUrl = lines[2].Trim();
+            DeviceIDList.AddRange(lines[3].Trim().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()));
+            postIPEndPointList.AddRange(lines[4].Trim().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => new IPEndPoint(new IPAddress(s.Trim().Split('.').Select(ss => byte.Parse(ss)).ToArray()), 0)));
         }
 
         //APIのSIDを取得
@@ -162,6 +163,134 @@ namespace ChBot
             finally
             {
 
+            }
+        }
+
+        private static async Task<string> SendDiscordMessage(string message)
+        {
+            var jsonstr = JsonSerializer.Serialize(new
+            {
+                content = message
+            }, new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                WriteIndented = true
+            });
+
+            jsonstr = Regex.Replace(jsonstr, @"([^\\])\\u3000", "$1　");
+            jsonstr = Regex.Replace(jsonstr, @"^\\u3000", "　");
+
+            var postDataBytes = Encoding.UTF8.GetBytes(jsonstr);
+
+            var req = (HttpWebRequest)WebRequest.Create("https://discordapp.com/api/channels/" + discordRoom + "/messages");
+            req.Method = "POST";
+            req.KeepAlive = false;
+            req.ContentType = "application/json";
+            req.ContentLength = postDataBytes.Length;
+            req.Headers.Set("Authorization", "Bot " + discordAuth);
+
+            //データをPOST送信するためのStreamを取得
+            using (var reqStream = await req.GetRequestStreamAsync().Timeout(10000))
+            {
+                await reqStream.WriteAsync(postDataBytes, 0, postDataBytes.Length).Timeout(10000);
+            }
+
+            using (var res = await req.GetResponseAsync().Timeout(10000))
+            using (var resStream = res.GetResponseStream())
+            using (var sr = new StreamReader(resStream))
+            {
+                return await sr.ReadToEndAsync().Timeout(10000);
+            }
+        }
+
+        private static async Task<string> GetDiscordMessage()
+        {
+            var req = (HttpWebRequest)WebRequest.Create("https://discordapp.com/api/channels/" + discordRoom + "/messages?limit=1");
+            req.Method = "GET";
+            req.KeepAlive = false;
+            req.ContentType = "application/json";
+            req.Headers.Set("Authorization", "Bot " + discordAuth);
+
+            using (var res = await req.GetResponseAsync().Timeout(10000))
+            using (var resStream = res.GetResponseStream())
+            using (var sr = new StreamReader(resStream))
+            {
+                var json = await sr.ReadToEndAsync().Timeout(10000);
+                var data = JsonSerializer.Deserialize<JsonElement>(json);
+                JsonElement isBot;
+                if (data[0].GetProperty("author").TryGetProperty("bot", out isBot))
+                    return "";
+                else
+                    return data[0].GetProperty("content").GetString();
+            }
+        }
+
+        private static async Task<string> SendCaptureToDiscord()
+        {
+            var fileName = "capture.png";
+            var bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+
+            using (var fs1 = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(new Point(0, 0), new Point(0, 0), bmp.Size);
+                fs1.SetLength(0);
+                bmp.Save(fs1, System.Drawing.Imaging.ImageFormat.Png);
+            }
+
+            var enc = Encoding.GetEncoding("shift_jis");
+            var boundary = Environment.TickCount.ToString();
+
+            var req = (HttpWebRequest)WebRequest.Create("https://discordapp.com/api/channels/" + discordRoom + "/messages");
+            req.Method = "POST";
+            req.KeepAlive = false;
+            req.ContentType = "multipart/form-data; boundary=" + boundary;
+            req.Headers.Set("Authorization", "Bot " + discordAuth);
+
+            //POST送信するデータを作成
+            var postData = "--" + boundary + "\r\n" +
+                    "Content-Disposition: form-data; name=\"comment\"\r\n\r\n" +
+                    "これは、テストです。\r\n" +
+                    "--" + boundary + "\r\n" +
+                    "Content-Disposition: form-data; name=\"upimg\"; filename=\"" +
+                        fileName + "\"\r\n" +
+                    "Content-Type: application/octet-stream\r\n" +
+                    "Content-Transfer-Encoding: binary\r\n\r\n";
+            //バイト型配列に変換
+            var startData = enc.GetBytes(postData);
+            postData = "\r\n--" + boundary + "--\r\n";
+            var endData = enc.GetBytes(postData);
+
+            //送信するファイルを開く
+            using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            {
+                //POST送信するデータの長さを指定
+                req.ContentLength = startData.Length + endData.Length + fs.Length;
+
+                //データをPOST送信するためのStreamを取得
+                using (var reqStream = await req.GetRequestStreamAsync().Timeout(10000))
+                {
+                    //送信するデータを書き込む
+                    await reqStream.WriteAsync(startData, 0, startData.Length).Timeout(10000);
+                    //ファイルの内容を送信
+                    var readData = new byte[0x1000];
+                    var readSize = 0;
+                    while (true)
+                    {
+                        readSize = await fs.ReadAsync(readData, 0, readData.Length);
+                        if (readSize == 0)
+                            break;
+                        await reqStream.WriteAsync(readData, 0, readSize).Timeout(10000);
+                    }
+                    await reqStream.WriteAsync(endData, 0, endData.Length).Timeout(10000);
+                }
+            }
+
+            using (var res = await req.GetResponseAsync().Timeout(10000))
+            using (var resStream = res.GetResponseStream())
+            using (var sr = new StreamReader(resStream))
+            {
+                return await sr.ReadToEndAsync().Timeout(10000);
             }
         }
 
@@ -740,7 +869,22 @@ namespace ChBot
             }
         }
 
-        public static async Task<string> SendLineMessage(string message)
+        public static async Task<string> SendMessage(string message)
+        {
+            return await SendDiscordMessage(message);
+        }
+
+        public static async Task<string> SendCapture()
+        {
+            return await SendCaptureToDiscord();
+        }
+
+        public static async Task<string> GetMessage()
+        {
+            return await GetDiscordMessage();
+        }
+
+        private static async Task<string> SendLineMessage(string message)
         {
             var jsonstr = JsonSerializer.Serialize(new
             {
@@ -781,7 +925,7 @@ namespace ChBot
             }
         }
 
-        public static async Task<string> SendLineImage(string url)
+        private static async Task<string> SendLineImage(string url)
         {
             var jsonstr = JsonSerializer.Serialize(new
             {
@@ -823,7 +967,7 @@ namespace ChBot
             }
         }
 
-        public static async Task<string> GetLineMessage(WebProxy proxy = null)
+        private static async Task<string> GetLineMessage(WebProxy proxy = null)
         {
             var req = (HttpWebRequest)WebRequest.Create(lineRecieveWebhookUrl);
             req.KeepAlive = false;

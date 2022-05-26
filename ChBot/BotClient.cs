@@ -139,7 +139,7 @@ namespace ChBot
                     {
                         if (pausing)
                         {
-                            try { await Network.SendLineMessage("[" + ui.InstanceName + "]" + Network.DeviceIDList[DeviceIndex] + ":動作再開しました"); } catch { }
+                            try { await Network.SendMessage("[" + ui.InstanceName + "]" + Network.DeviceIDList[DeviceIndex] + ":動作再開しました"); } catch { }
                             pausing = false;
                         }
 
@@ -248,7 +248,7 @@ namespace ChBot
                     hasLastChance = true;
                     try
                     {
-                        await Network.SendLineMessage("モバイル回線の復旧に成功しました。");
+                        await Network.SendMessage("モバイル回線の復旧に成功しました。");
                     }
                     catch { }
                 }
@@ -269,7 +269,7 @@ namespace ChBot
                         // リトライ回数が上限を超えたらUSBを再起動してリトライ回数をリセットして再度試す
                         Attempt = 0;
                         hasLastChance = false;
-                        try { await Network.SendLineMessage("エラーのためコマンドを試行します\n" + _er.Message); } catch { }
+                        try { await Network.SendMessage("エラーのためコマンドを試行します\n" + _er.Message); } catch { }
                         ReportProgress("RESTART_USB_STARTED");
                         try
                         {
@@ -283,7 +283,7 @@ namespace ChBot
                     }
                     else if (UnixTime.Now() - Properties.Settings.Default.LastRetry > 120)
                     {
-                        try { await Network.SendLineMessage("エラーのため再起動します\n" + _er.Message); } catch { }
+                        try { await Network.SendMessage("エラーのため再起動します\n" + _er.Message); } catch { }
                         ui.manager.restartFlag = true;
                         waitingReboot = true;
                         return 0;
@@ -294,10 +294,10 @@ namespace ChBot
                         ReportProgress("MAIN_FAIL_STOP_COMPLETED");
                         try
                         {
-                            await Network.SendLineMessage(ui.InstanceName + ":" + _er.Message);
+                            await Network.SendMessage(ui.InstanceName + ":" + _er.Message);
                             var message = ResultWebBrowser.Document.Body.InnerText;
                             if (_er as PostFailureException != null)
-                                await Network.SendLineMessage(message);
+                                await Network.SendMessage(message);
                         }
                         catch (Exception er2)
                         {

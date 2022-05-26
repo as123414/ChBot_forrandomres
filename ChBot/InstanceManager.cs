@@ -46,7 +46,7 @@ namespace ChBot
             {
                 try
                 {
-                    await Network.SendLineMessage("再起動しました");
+                    await Network.SendMessage("再起動しました");
                 }
                 catch { }
             }
@@ -65,7 +65,7 @@ namespace ChBot
                 {
                     try
                     {
-                        await Network.SendLineMessage("config.txtの読み込みに失敗");
+                        await Network.SendMessage("config.txtの読み込みに失敗");
                     }
                     catch { }
                 }
@@ -364,7 +364,7 @@ namespace ChBot
                 if (instanceList.Any(ins => ins.context.Loginer.Logining))
                     return;
 
-                var msg = await Network.GetLineMessage();
+                var msg = await Network.GetMessage();
                 if (msg == "")
                     return;
 
@@ -407,7 +407,7 @@ namespace ChBot
                     foreach (var instance in instanceList)
                     {
                         var text = "[" + instance.InstanceName + "]\n" + string.Join("\n", instance.context.SearchConditions.Select(c => c.SearchMode == SearchCondition.SearchModes.Url ? c.Url : c.Word));
-                        await Network.SendLineMessage(text);
+                        await Network.SendMessage(text);
                     }
 
                     return;
@@ -424,38 +424,35 @@ namespace ChBot
                 switch (Regex.IsMatch(msg, @"^\d+$") ? (int.Parse(msg) >= 0 && int.Parse(msg) < commands.Length ? commands[int.Parse(msg)] : msg.ToUpper()) : msg.ToUpper())
                 {
                     case "START":
-                        await Network.SendLineMessage("RECIEVED.");
+                        await Network.SendMessage("RECIEVED.");
                         foreach (var instance in instanceList)
                             await instance.context.StartAttack();
                         await Task.Delay(500);
-                        var url = await Network.UploadCapture();
-                        await Network.SendLineImage(url);
-                        await Network.SendLineMessage("DONE.");
+                        await Network.SendCapture();
+                        await Network.SendMessage("DONE.");
                         break;
                     case "STOP":
-                        await Network.SendLineMessage("RECIEVED.");
+                        await Network.SendMessage("RECIEVED.");
                         foreach (var instance in instanceList)
                             await instance.context.StopAttack();
                         await Task.Delay(500);
-                        var url2 = await Network.UploadCapture();
-                        await Network.SendLineImage(url2);
-                        await Network.SendLineMessage("DONE.");
+                        await Network.SendCapture();
+                        await Network.SendMessage("DONE.");
                         break;
                     case "CAPTURE":
-                        await Network.SendLineMessage("RECIEVED.");
-                        var url3 = await Network.UploadCapture();
-                        await Network.SendLineImage(url3);
-                        await Network.SendLineMessage("DONE.");
+                        await Network.SendMessage("RECIEVED.");
+                        await Network.SendCapture();
+                        await Network.SendMessage("DONE.");
                         break;
                     case "REBOOT":
-                        await Network.SendLineMessage("OK.");
+                        await Network.SendMessage("OK.");
                         Close();
                         Properties.Settings.Default.IsRestart = true;
                         Properties.Settings.Default.Save();
                         Application.Restart();
                         break;
                     case "CLEAR_URL":
-                        await Network.SendLineMessage("RECIEVED.");
+                        await Network.SendMessage("RECIEVED.");
                         foreach (var instance in instanceList)
                         {
                             instance.context.SearchConditions = instance.context.SearchConditions.Where(condition => condition.SearchMode != SearchCondition.SearchModes.Url).ToList();
@@ -465,25 +462,25 @@ namespace ChBot
                         foreach (var instance in instanceList)
                         {
                             var text = "[" + instance.InstanceName + "]\n" + string.Join("\n", instance.context.SearchConditions.Select(c => c.SearchMode == SearchCondition.SearchModes.Url ? c.Url : c.Word));
-                            await Network.SendLineMessage(text);
+                            await Network.SendMessage(text);
                         }
-                        await Network.SendLineMessage("DONE.");
+                        await Network.SendMessage("DONE.");
                         break;
                     default:
-                        await Network.SendLineMessage("UNRECOGNIZED.");
+                        await Network.SendMessage("UNRECOGNIZED.");
                         break;
                 }
 
                 var comTxt = "";
                 for (var i = 0; i < commands.Length; i++)
                     comTxt += "[" + i + "] " + commands[i] + "\n";
-                await Network.SendLineMessage(comTxt.Trim());
+                await Network.SendMessage(comTxt.Trim());
             }
             catch (Exception er)
             {
                 try
                 {
-                    await Network.SendLineMessage("[InstanceManager]\n" + er.Message);
+                    await Network.SendMessage("[InstanceManager]\n" + er.Message);
                 }
                 catch { }
             }

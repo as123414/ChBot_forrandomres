@@ -149,7 +149,7 @@
             this.MessageTextBox.Multiline = true;
             this.MessageTextBox.Name = "MessageTextBox";
             this.MessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.MessageTextBox.Size = new System.Drawing.Size(222, 244);
+            this.MessageTextBox.Size = new System.Drawing.Size(222, 245);
             this.MessageTextBox.TabIndex = 0;
             this.MessageTextBox.WordWrap = false;
             this.MessageTextBox.TextChanged += new System.EventHandler(this.MessageTextBox_TextChanged);
@@ -175,7 +175,7 @@
             this.ResultWebBrowser.Name = "ResultWebBrowser";
             this.ResultWebBrowser.ScriptErrorsSuppressed = true;
             this.ResultWebBrowser.ScrollBarsEnabled = false;
-            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 242);
+            this.ResultWebBrowser.Size = new System.Drawing.Size(234, 243);
             this.ResultWebBrowser.TabIndex = 3;
             // 
             // IntervalNumericUpDown
@@ -208,7 +208,7 @@
             this.ThreadListListView.Margin = new System.Windows.Forms.Padding(2);
             this.ThreadListListView.Name = "ThreadListListView";
             this.ThreadListListView.ShowItemToolTips = true;
-            this.ThreadListListView.Size = new System.Drawing.Size(391, 244);
+            this.ThreadListListView.Size = new System.Drawing.Size(391, 245);
             this.ThreadListListView.TabIndex = 14;
             this.toolTip1.SetToolTip(this.ThreadListListView, "赤 - 有効\r\n黄 - 現在の書き込み対象\r\n灰 - 無視されます");
             this.ThreadListListView.UseCompatibleStateImageBehavior = false;
@@ -560,7 +560,7 @@
             // 
             this.splitContainer6.Panel2.Controls.Add(this.panel2);
             this.splitContainer6.Size = new System.Drawing.Size(855, 65);
-            this.splitContainer6.SplitterDistance = 503;
+            this.splitContainer6.SplitterDistance = 504;
             this.splitContainer6.SplitterWidth = 3;
             this.splitContainer6.TabIndex = 52;
             // 
@@ -587,7 +587,7 @@
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(2);
-            this.panel2.Size = new System.Drawing.Size(349, 65);
+            this.panel2.Size = new System.Drawing.Size(348, 65);
             this.panel2.TabIndex = 13;
             // 
             // button18
@@ -672,7 +672,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.LoginButton);
             this.splitContainer2.Panel2.Padding = new System.Windows.Forms.Padding(2);
             this.splitContainer2.Size = new System.Drawing.Size(855, 536);
-            this.splitContainer2.SplitterDistance = 244;
+            this.splitContainer2.SplitterDistance = 245;
             this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 15;
             // 
@@ -691,7 +691,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(855, 244);
+            this.splitContainer3.Size = new System.Drawing.Size(855, 245);
             this.splitContainer3.SplitterDistance = 222;
             this.splitContainer3.SplitterWidth = 3;
             this.splitContainer3.TabIndex = 0;
@@ -710,7 +710,7 @@
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.MessageTextBox);
-            this.splitContainer5.Size = new System.Drawing.Size(222, 244);
+            this.splitContainer5.Size = new System.Drawing.Size(222, 245);
             this.splitContainer5.SplitterDistance = 25;
             this.splitContainer5.SplitterWidth = 3;
             this.splitContainer5.TabIndex = 1;
@@ -730,7 +730,7 @@
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.ThreadListListView);
-            this.splitContainer4.Size = new System.Drawing.Size(630, 244);
+            this.splitContainer4.Size = new System.Drawing.Size(630, 245);
             this.splitContainer4.SplitterDistance = 236;
             this.splitContainer4.SplitterWidth = 3;
             this.splitContainer4.TabIndex = 0;
@@ -743,7 +743,7 @@
             this.panel6.Location = new System.Drawing.Point(0, 0);
             this.panel6.Margin = new System.Windows.Forms.Padding(2);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(236, 244);
+            this.panel6.Size = new System.Drawing.Size(236, 245);
             this.panel6.TabIndex = 4;
             // 
             // checkBox1
@@ -896,9 +896,9 @@
             this.button14.Location = new System.Drawing.Point(641, 62);
             this.button14.Margin = new System.Windows.Forms.Padding(2);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(60, 25);
+            this.button14.Size = new System.Drawing.Size(84, 25);
             this.button14.TabIndex = 116;
-            this.button14.Text = "Get Line";
+            this.button14.Text = "Get Message";
             this.button14.UseVisualStyleBackColor = true;
             this.button14.Click += new System.EventHandler(this.button14_Click);
             // 
@@ -909,9 +909,10 @@
             this.button12.Location = new System.Drawing.Point(641, 33);
             this.button12.Margin = new System.Windows.Forms.Padding(2);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(67, 25);
+            this.button12.Size = new System.Drawing.Size(91, 25);
             this.button12.TabIndex = 114;
-            this.button12.Text = "Send Line";
+            this.button12.Text = "Send Message";
+            this.button12.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 

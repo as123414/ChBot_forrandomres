@@ -113,7 +113,7 @@ namespace ChBot
 
                 if (pausing)
                 {
-                    try { await Network.SendLineMessage(ui.InstanceName + ":動作再開しました"); } catch { }
+                    try { await Network.SendMessage(ui.InstanceName + ":動作再開しました"); } catch { }
                     pausing = false;
                 }
 
@@ -131,7 +131,7 @@ namespace ChBot
                 {
                     if (UnixTime.Now() - Properties.Settings.Default.LastRetry > 120)
                     {
-                        try { await Network.SendLineMessage("更新エラーのため再起動します"); } catch { }
+                        try { await Network.SendMessage("更新エラーのため再起動します"); } catch { }
                         ui.manager.restartFlag = true;
                         waitingReboot = true;
                         code = 0;
@@ -139,7 +139,7 @@ namespace ChBot
                     else
                     {
                         code = 1;
-                        try { await Network.SendLineMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
+                        try { await Network.SendMessage("[" + ui.InstanceName + "] 更新エラーにより動作停止\n" + _er.Message); } catch { }
                     }
                 }
             }
@@ -178,7 +178,7 @@ namespace ChBot
             {
                 foreach (var thread in newThreads)
                 {
-                    await Network.SendLineMessage("新規スレッドを検知 [" + notifiedThreads.Last().Title + "]");
+                    await Network.SendMessage("新規スレッドを検知 [" + notifiedThreads.Last().Title + "]");
                 }
             }
         }
